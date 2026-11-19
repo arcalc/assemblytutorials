@@ -1,0 +1,1988 @@
+<!DOCTYPE html>
+<html lang="en" data-color-mode="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>arcalc/assemblytutorials — Low-Level CS, Systems Programming &amp; Security Roadmap</title>
+  <meta name="description" content="Structured GitHub-styled curriculum spanning foundational computer science, C/C++ systems programming, x86-64 assembly, ABIs, OS internals, SIMD performance tuning, and reverse engineering." />
+  <style>
+    /* ==========================================================================
+       STRICT GITHUB PRIMER COLOR TOKENS (DARK DEFAULT & LIGHT DEFAULT ONLY)
+       ========================================================================== */
+    :root,
+    [data-color-mode="dark"] {
+      color-scheme: dark;
+      --bg-canvas: #0d1117;
+      --bg-subtle: #161b22;
+      --bg-inset: #010409;
+      --bg-overlay: #161b22;
+      --btn-bg: #21262d;
+      --btn-hover-bg: #30363d;
+      --btn-border: #30363d;
+      --btn-primary-bg: #23863a;
+      --btn-primary-hover: #2ea043;
+      --btn-primary-text: #ffffff;
+      --border-default: #30363d;
+      --border-muted: #21262d;
+      --fg-default: #e6edf3;
+      --fg-muted: #7d8590;
+      --fg-subtle: #484f58;
+      --accent-fg: #2f81f7;
+      --accent-emphasis: #1f6feb;
+      --accent-subtle: rgba(56, 139, 253, 0.15);
+      --accent-border: rgba(56, 139, 253, 0.4);
+      --success-fg: #3fb950;
+      --success-emphasis: #23863a;
+      --success-subtle: rgba(46, 160, 67, 0.15);
+      --success-border: rgba(46, 160, 67, 0.4);
+      --attention-fg: #d29922;
+      --attention-subtle: rgba(187, 128, 9, 0.15);
+      --attention-border: rgba(187, 128, 9, 0.4);
+      --danger-fg: #f85149;
+      --danger-subtle: rgba(248, 81, 73, 0.15);
+      --danger-border: rgba(248, 81, 73, 0.4);
+      --done-fg: #a371f7;
+      --done-subtle: rgba(163, 113, 247, 0.15);
+      --done-border: rgba(163, 113, 247, 0.4);
+      --neutral-subtle: rgba(110, 118, 129, 0.15);
+      --row-hover: #161b22;
+      --row-completed: rgba(46, 160, 67, 0.06);
+      --tab-active-border: #f78166;
+    }
+
+    [data-color-mode="light"] {
+      color-scheme: light;
+      --bg-canvas: #ffffff;
+      --bg-subtle: #f6f8fa;
+      --bg-inset: #f6f8fa;
+      --bg-overlay: #ffffff;
+      --btn-bg: #f6f8fa;
+      --btn-hover-bg: #eaeef2;
+      --btn-border: #d0d7de;
+      --btn-primary-bg: #1f883d;
+      --btn-primary-hover: #1a7f37;
+      --btn-primary-text: #ffffff;
+      --border-default: #d0d7de;
+      --border-muted: #d8dee4;
+      --fg-default: #1f2328;
+      --fg-muted: #656d76;
+      --fg-subtle: #6e7781;
+      --accent-fg: #0969da;
+      --accent-emphasis: #0969da;
+      --accent-subtle: rgba(9, 105, 218, 0.1);
+      --accent-border: rgba(9, 105, 218, 0.4);
+      --success-fg: #1a7f37;
+      --success-emphasis: #1f883d;
+      --success-subtle: rgba(26, 127, 55, 0.1);
+      --success-border: rgba(26, 127, 55, 0.4);
+      --attention-fg: #9a6700;
+      --attention-subtle: rgba(154, 103, 0, 0.1);
+      --attention-border: rgba(154, 103, 0, 0.4);
+      --danger-fg: #cf222e;
+      --danger-subtle: rgba(207, 34, 46, 0.1);
+      --danger-border: rgba(207, 34, 46, 0.4);
+      --done-fg: #8250df;
+      --done-subtle: rgba(130, 80, 223, 0.1);
+      --done-border: rgba(130, 80, 223, 0.4);
+      --neutral-subtle: rgba(175, 184, 193, 0.2);
+      --row-hover: #f6f8fa;
+      --row-completed: rgba(26, 127, 55, 0.05);
+      --tab-active-border: #fd8c73;
+    }
+
+    /* ==========================================================================
+       BASE & TYPOGRAPHY (GITHUB PRIMER SYSTEM STACK)
+       ========================================================================== */
+    *, *::before, *::after {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+      font-size: 16px;
+    }
+
+    body {
+      margin: 0;
+      background-color: var(--bg-canvas);
+      color: var(--fg-default);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    code, pre, .font-mono {
+      font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+    }
+
+    code {
+      font-size: 85%;
+      padding: 0.15em 0.38em;
+      margin: 0;
+      background-color: var(--neutral-subtle);
+      border-radius: 6px;
+      border: 1px solid var(--border-muted);
+    }
+
+    a {
+      color: var(--accent-fg);
+      text-decoration: none;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    /* ==========================================================================
+       GITHUB REPOSITORY TOP HEADER & UNDERLINE NAV
+       ========================================================================== */
+    .gh-repo-header {
+      background-color: var(--bg-subtle);
+      border-bottom: 1px solid var(--border-default);
+      padding-top: 16px;
+    }
+
+    .gh-container {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+
+    @media (max-width: 640px) {
+      .gh-container {
+        padding: 0 14px;
+      }
+    }
+
+    .gh-header-top {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+
+    .gh-repo-title {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+      font-size: 18px;
+      line-height: 1.3;
+    }
+
+    .gh-repo-title svg {
+      color: var(--fg-muted);
+      flex-shrink: 0;
+    }
+
+    .gh-repo-owner {
+      color: var(--accent-fg);
+      font-weight: 400;
+    }
+
+    .gh-repo-slash {
+      color: var(--fg-muted);
+    }
+
+    .gh-repo-name {
+      color: var(--accent-fg);
+      font-weight: 600;
+    }
+
+    .gh-visibility-pill {
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--fg-muted);
+      border: 1px solid var(--border-default);
+      border-radius: 999px;
+      padding: 1px 8px;
+      line-height: 18px;
+    }
+
+    .gh-header-actions {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* GitHub Primer Buttons */
+    .gh-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      padding: 5px 12px;
+      font-size: 12px;
+      font-weight: 500;
+      line-height: 20px;
+      color: var(--fg-default);
+      background-color: var(--btn-bg);
+      border: 1px solid var(--btn-border);
+      border-radius: 6px;
+      cursor: pointer;
+      user-select: none;
+      transition: background-color 0.12s ease, border-color 0.12s ease;
+    }
+
+    .gh-btn:hover {
+      background-color: var(--btn-hover-bg);
+      border-color: var(--fg-muted);
+      text-decoration: none;
+    }
+
+    .gh-btn.selected {
+      background-color: var(--accent-subtle);
+      border-color: var(--accent-fg);
+      color: var(--accent-fg);
+      font-weight: 600;
+    }
+
+    .gh-btn-primary {
+      background-color: var(--btn-primary-bg);
+      border-color: var(--btn-primary-bg);
+      color: var(--btn-primary-text);
+    }
+
+    .gh-btn-primary:hover {
+      background-color: var(--btn-primary-hover);
+      border-color: var(--btn-primary-hover);
+    }
+
+    .gh-btn-danger {
+      color: var(--danger-fg);
+    }
+
+    .gh-btn-danger:hover {
+      background-color: var(--danger-subtle);
+      border-color: var(--danger-border);
+    }
+
+    /* Underline Navigation Tabs */
+    .gh-tabs {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+
+    .gh-tabs::-webkit-scrollbar {
+      display: none;
+    }
+
+    .gh-tab {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 12px;
+      font-size: 14px;
+      font-weight: 400;
+      color: var(--fg-default);
+      background: transparent;
+      border: none;
+      border-bottom: 2px solid transparent;
+      cursor: pointer;
+      white-space: nowrap;
+      border-radius: 6px 6px 0 0;
+    }
+
+    .gh-tab:hover {
+      background-color: var(--neutral-subtle);
+    }
+
+    .gh-tab.active {
+      font-weight: 600;
+      border-bottom-color: var(--tab-active-border);
+    }
+
+    .gh-counter {
+      display: inline-block;
+      min-width: 20px;
+      padding: 0 6px;
+      font-size: 12px;
+      font-weight: 500;
+      line-height: 18px;
+      text-align: center;
+      background-color: var(--neutral-subtle);
+      color: var(--fg-default);
+      border-radius: 999px;
+    }
+
+    /* ==========================================================================
+       MAIN LAYOUT GRID (STICKY TOC SIDEBAR + README BOX)
+       ========================================================================== */
+    .gh-main-grid {
+      display: grid;
+      grid-template-columns: 270px minmax(0, 1fr);
+      gap: 24px;
+      padding-top: 24px;
+      padding-bottom: 48px;
+      align-items: start;
+    }
+
+    @media (max-width: 960px) {
+      .gh-main-grid {
+        grid-template-columns: minmax(0, 1fr);
+      }
+    }
+
+    /* Sidebar */
+    .gh-sidebar {
+      position: sticky;
+      top: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    @media (max-width: 960px) {
+      .gh-sidebar {
+        position: static;
+      }
+    }
+
+    .gh-box {
+      background-color: var(--bg-canvas);
+      border: 1px solid var(--border-default);
+      border-radius: 6px;
+      overflow: hidden;
+    }
+
+    .gh-box-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      padding: 10px 14px;
+      background-color: var(--bg-subtle);
+      border-bottom: 1px solid var(--border-default);
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .gh-box-body {
+      padding: 14px;
+    }
+
+    /* Progress Bar */
+    .gh-progress-track {
+      width: 100%;
+      height: 8px;
+      background-color: var(--border-muted);
+      border-radius: 999px;
+      overflow: hidden;
+      margin: 8px 0;
+    }
+
+    .gh-progress-fill {
+      height: 100%;
+      width: 0%;
+      background-color: var(--success-emphasis);
+      border-radius: 999px;
+      transition: width 0.2s ease;
+    }
+
+    /* Sidebar TOC Links */
+    .gh-toc-list {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      padding: 8px;
+    }
+
+    .gh-toc-link {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      padding: 6px 10px;
+      font-size: 12.5px;
+      color: var(--fg-muted);
+      border-left: 2px solid transparent;
+      border-radius: 0 6px 6px 0;
+      text-decoration: none;
+    }
+
+    .gh-toc-link:hover {
+      background-color: var(--bg-subtle);
+      color: var(--fg-default);
+      text-decoration: none;
+    }
+
+    .gh-toc-link.active {
+      color: var(--fg-default);
+      font-weight: 600;
+      background-color: var(--accent-subtle);
+      border-left-color: var(--accent-fg);
+    }
+
+    /* ==========================================================================
+       FILTER & SEARCH CONTROL BAR
+       ========================================================================== */
+    .gh-filter-bar {
+      background-color: var(--bg-subtle);
+      border: 1px solid var(--border-default);
+      border-radius: 6px;
+      padding: 14px;
+      margin-bottom: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .gh-filter-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .gh-search-wrap {
+      position: relative;
+      flex: 1 1 280px;
+      display: flex;
+      align-items: center;
+    }
+
+    .gh-search-icon {
+      position: absolute;
+      left: 10px;
+      color: var(--fg-muted);
+      pointer-events: none;
+    }
+
+    .gh-input {
+      width: 100%;
+      padding: 5px 30px 5px 32px;
+      font-size: 13px;
+      line-height: 20px;
+      color: var(--fg-default);
+      background-color: var(--bg-inset);
+      border: 1px solid var(--border-default);
+      border-radius: 6px;
+      outline: none;
+    }
+
+    .gh-input:focus {
+      border-color: var(--accent-fg);
+      box-shadow: 0 0 0 3px var(--accent-subtle);
+    }
+
+    .gh-clear-btn {
+      position: absolute;
+      right: 8px;
+      background: transparent;
+      border: none;
+      color: var(--fg-muted);
+      cursor: pointer;
+      font-size: 14px;
+      padding: 2px 5px;
+      border-radius: 4px;
+    }
+
+    .gh-clear-btn:hover {
+      color: var(--fg-default);
+      background-color: var(--neutral-subtle);
+    }
+
+    .gh-select {
+      padding: 5px 10px;
+      font-size: 12.5px;
+      line-height: 20px;
+      color: var(--fg-default);
+      background-color: var(--btn-bg);
+      border: 1px solid var(--btn-border);
+      border-radius: 6px;
+      outline: none;
+      cursor: pointer;
+    }
+
+    .gh-select:focus {
+      border-color: var(--accent-fg);
+    }
+
+    .gh-btn-group {
+      display: inline-flex;
+      flex-wrap: wrap;
+      gap: 4px;
+    }
+
+    /* ==========================================================================
+       README ARTICLE & GITHUB MARKDOWN ALERTS ([!NOTE], [!WARNING])
+       ========================================================================== */
+    .gh-readme-body {
+      padding: 28px 32px;
+    }
+
+    @media (max-width: 640px) {
+      .gh-readme-body {
+        padding: 18px 16px;
+      }
+    }
+
+    .gh-readme-body h1 {
+      font-size: 26px;
+      font-weight: 600;
+      padding-bottom: 0.35em;
+      margin: 0 0 16px 0;
+      border-bottom: 1px solid var(--border-muted);
+      line-height: 1.25;
+    }
+
+    .gh-readme-body h2 {
+      font-size: 20px;
+      font-weight: 600;
+      line-height: 1.3;
+      margin: 0;
+    }
+
+    .gh-readme-body h3 {
+      font-size: 15px;
+      font-weight: 600;
+      margin: 16px 0 8px 0;
+    }
+
+    .gh-readme-body p {
+      margin: 0 0 14px 0;
+      font-size: 14.5px;
+      line-height: 1.65;
+    }
+
+    /* GitHub Markdown Alerts */
+    .gh-alert {
+      padding: 12px 16px;
+      margin-bottom: 16px;
+      border-left: 4px solid var(--accent-fg);
+      background-color: var(--bg-subtle);
+      border-radius: 0 6px 6px 0;
+    }
+
+    .gh-alert-note {
+      border-left-color: var(--accent-fg);
+    }
+
+    .gh-alert-warning {
+      border-left-color: var(--attention-fg);
+    }
+
+    .gh-alert-title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 6px;
+    }
+
+    .gh-alert-note .gh-alert-title {
+      color: var(--accent-fg);
+    }
+
+    .gh-alert-warning .gh-alert-title {
+      color: var(--attention-fg);
+    }
+
+    .gh-alert p {
+      margin: 0;
+      font-size: 13.5px;
+      line-height: 1.6;
+      color: var(--fg-default);
+    }
+
+    /* ==========================================================================
+       SECTIONS, TABLES, BADGES & CHECKBOXES
+       ========================================================================== */
+    .gh-sections-stack {
+      display: flex;
+      flex-direction: column;
+      gap: 36px;
+    }
+
+    .gh-section-header {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding-bottom: 10px;
+      margin-bottom: 16px;
+      border-bottom: 1px solid var(--border-muted);
+    }
+
+    .gh-section-title-wrap {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .gh-anchor {
+      color: var(--fg-muted);
+      font-weight: 400;
+      font-size: 16px;
+    }
+
+    .gh-anchor:hover {
+      color: var(--accent-fg);
+      text-decoration: none;
+    }
+
+    .gh-table-wrap {
+      width: 100%;
+      overflow-x: auto;
+      border: 1px solid var(--border-default);
+      border-radius: 6px;
+    }
+
+    .gh-table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 13.5px;
+    }
+
+    .gh-table thead tr {
+      background-color: var(--bg-subtle);
+      border-bottom: 1px solid var(--border-default);
+    }
+
+    .gh-table th {
+      padding: 9px 12px;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--fg-muted);
+      white-space: nowrap;
+    }
+
+    .gh-table td {
+      padding: 10px 12px;
+      border-top: 1px solid var(--border-muted);
+      vertical-align: top;
+    }
+
+    .gh-table tbody tr:hover {
+      background-color: var(--row-hover);
+    }
+
+    .gh-table tbody tr.row-completed {
+      background-color: var(--row-completed);
+    }
+
+    .gh-table tbody tr.row-completed .res-title-link {
+      text-decoration: line-through;
+      opacity: 0.78;
+    }
+
+    /* Primer Label Badges */
+    .gh-badge {
+      display: inline-block;
+      padding: 1px 8px;
+      font-size: 11.5px;
+      font-weight: 500;
+      line-height: 18px;
+      border-radius: 999px;
+      border: 1px solid transparent;
+      white-space: nowrap;
+    }
+
+    .badge-neutral {
+      background-color: var(--neutral-subtle);
+      color: var(--fg-muted);
+      border-color: var(--border-default);
+    }
+
+    .badge-accent {
+      background-color: var(--accent-subtle);
+      color: var(--accent-fg);
+      border-color: var(--accent-border);
+    }
+
+    .badge-success {
+      background-color: var(--success-subtle);
+      color: var(--success-fg);
+      border-color: var(--success-border);
+    }
+
+    .badge-attention {
+      background-color: var(--attention-subtle);
+      color: var(--attention-fg);
+      border-color: var(--attention-border);
+    }
+
+    .badge-danger {
+      background-color: var(--danger-subtle);
+      color: var(--danger-fg);
+      border-color: var(--danger-border);
+    }
+
+    .badge-done {
+      background-color: var(--done-subtle);
+      color: var(--done-fg);
+      border-color: var(--done-border);
+    }
+
+    /* Native Checkbox Accent */
+    .gh-checkbox {
+      width: 16px;
+      height: 16px;
+      margin-top: 2px;
+      accent-color: var(--success-emphasis);
+      cursor: pointer;
+    }
+
+    .gh-ref-tag {
+      font-size: 11px;
+      color: var(--fg-muted);
+      text-decoration: none;
+      margin-left: 2px;
+    }
+
+    .gh-ref-tag:hover {
+      color: var(--accent-fg);
+      text-decoration: underline;
+    }
+
+    /* Toast Notification */
+    .gh-toast {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 14px;
+      font-size: 13px;
+      color: var(--fg-default);
+      background-color: var(--bg-subtle);
+      border: 1px solid var(--border-default);
+      border-radius: 6px;
+      opacity: 0;
+      transform: translateY(8px);
+      pointer-events: none;
+      transition: opacity 0.18s ease, transform 0.18s ease;
+    }
+
+    .gh-toast.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .gh-empty-box {
+      padding: 32px 20px;
+      text-align: center;
+      border: 1px solid var(--border-default);
+      border-radius: 6px;
+      background-color: var(--bg-subtle);
+      margin-bottom: 24px;
+    }
+  </style>
+</head>
+<body>
+  <!-- ========================================================================
+       GITHUB REPOSITORY HEADER
+       ======================================================================== -->
+  <header class="gh-repo-header">
+    <div class="gh-container">
+      <div class="gh-header-top">
+        <div class="gh-repo-title">
+          <svg aria-hidden="true" height="16" viewBox="0 0 16 16" width="16" fill="currentColor">
+            <path d="M2 2.5A2.5 2.5 0 0 1 4.5 0h8.75a.75.75 0 0 1 .75.75v12.5a.75.75 0 0 1-.75.75h-2.5a.75.75 0 0 1 0-1.5h1.75v-2h-8a1 1 0 0 0-.714 1.7.75.75 0 1 1-1.072 1.05A2.495 2.495 0 0 1 2 11.5Zm10.5-1h-8a1 1 0 0 0-1 1v6.708A2.486 2.486 0 0 1 4.5 9h8ZM5 12.25a.25.25 0 0 1 .25-.25h3.5a.25.25 0 0 1 .25.25v3.25a.25.25 0 0 1-.4.2l-1.45-1.087a.249.249 0 0 0-.3 0L5.4 15.7a.25.25 0 0 1-.4-.2Z"></path>
+          </svg>
+          <a href="https://github.com/arcalc" target="_blank" rel="noopener noreferrer" class="gh-repo-owner">arcalc</a>
+          <span class="gh-repo-slash">/</span>
+          <a href="https://github.com/arcalc/assemblytutorials" target="_blank" rel="noopener noreferrer" class="gh-repo-name">assemblytutorials</a>
+          <span class="gh-visibility-pill">Public</span>
+        </div>
+
+        <div class="gh-header-actions">
+          <button type="button" id="btn-copy-summary" class="gh-btn" title="Copy Markdown checklist to clipboard">
+            <svg aria-hidden="true" height="14" viewBox="0 0 16 16" width="14" fill="currentColor">
+              <path d="M0 6.75C0 5.784.784 5 1.75 5h1.5a.75.75 0 0 1 0 1.5h-1.5a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-1.5a.75.75 0 0 1 1.5 0v1.5A1.75 1.75 0 0 1 9.25 16h-7.5A1.75 1.75 0 0 1 0 14.25Z"></path>
+              <path d="M5 1.75C5 .784 5.784 0 6.75 0h7.5C15.216 0 16 .784 16 1.75v7.5A1.75 1.75 0 0 1 14.25 11h-7.5A1.75 1.75 0 0 1 5 9.25Zm1.75-.25a.25.25 0 0 0-.25.25v7.5c0 .138.112.25.25.25h7.5a.25.25 0 0 0 .25-.25v-7.5a.25.25 0 0 0-.25-.25Z"></path>
+            </svg>
+            <span>Copy Progress</span>
+          </button>
+
+          <button type="button" id="btn-theme-toggle" class="gh-btn" aria-label="Toggle GitHub Primer color mode">
+            <span id="theme-icon-wrap"></span>
+            <span id="theme-label">Dark Default</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- GitHub Repository Underline Navigation Tabs -->
+      <nav class="gh-tabs" aria-label="Repository navigation">
+        <button type="button" class="gh-tab active" data-nav-target="overview">
+          <svg aria-hidden="true" height="16" viewBox="0 0 16 16" width="16" fill="currentColor">
+            <path d="M0 1.75A.75.75 0 0 1 .75 1h4.253c1.227 0 2.317.59 3 1.501A3.743 3.743 0 0 1 11.006 1h4.245a.75.75 0 0 1 .75.75v10.5a.75.75 0 0 1-.75.75h-4.507a2.25 2.25 0 0 0-1.591.659l-.622.621a.75.75 0 0 1-1.06 0l-.622-.621A2.25 2.25 0 0 0 5.258 13H.75a.75.75 0 0 1-.75-.75Zm7.251 10.324.004-5.073-.002-2.253A2.25 2.25 0 0 0 5.003 2.5H1.5v9h3.757a3.75 3.75 0 0 1 1.994.574ZM8.755 4.75l-.004 7.322a3.752 3.752 0 0 1 1.992-.572H14.5v-9h-3.495a2.25 2.25 0 0 0-2.25 2.25Z"></path>
+          </svg>
+          <span>README.md</span>
+          <span class="gh-counter" id="tab-total-badge">111</span>
+        </button>
+        <button type="button" class="gh-tab" data-nav-target="abi-comparison-matrix">
+          <span>ABI Matrix</span>
+        </button>
+        <button type="button" class="gh-tab" data-nav-target="section-3">
+          <span>x86-64 Assembly</span>
+        </button>
+        <button type="button" class="gh-tab" data-nav-target="section-5">
+          <span>OS Dev</span>
+        </button>
+        <button type="button" class="gh-tab" data-nav-target="section-6">
+          <span>SIMD &amp; Perf</span>
+        </button>
+        <button type="button" class="gh-tab" data-nav-target="section-7">
+          <span>Reversing &amp; Pwn</span>
+        </button>
+        <button type="button" class="gh-tab" data-nav-target="sources-appendix">
+          <span>Sources</span>
+          <span class="gh-counter">113</span>
+        </button>
+      </nav>
+    </div>
+  </header>
+
+  <!-- ========================================================================
+       MAIN CONTENT GRID (STICKY TOC SIDEBAR + README CONTENT)
+       ======================================================================== -->
+  <div class="gh-container">
+    <div class="gh-main-grid">
+      <!-- Left Sticky Sidebar -->
+      <aside class="gh-sidebar" aria-label="Curriculum Progress and Navigation">
+        <!-- Completion Progress Box -->
+        <div class="gh-box">
+          <div class="gh-box-header">
+            <span>Curriculum Progress</span>
+            <span class="font-mono" id="global-progress-text" style="font-size: 12px; color: var(--fg-muted);">0 / 111 (0%)</span>
+          </div>
+          <div class="gh-box-body">
+            <div class="gh-progress-track" id="global-progress-bar-wrap" role="progressbar" aria-valuemin="0" aria-valuemax="111" aria-valuenow="0">
+              <div class="gh-progress-fill" id="global-progress-fill"></div>
+            </div>
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-top: 8px;">
+              <span style="font-size: 11.5px; color: var(--fg-muted);">Saved in browser storage</span>
+              <button type="button" id="btn-reset-prompt" class="gh-btn gh-btn-danger" style="padding: 2px 8px; font-size: 11px;">Reset</button>
+            </div>
+            <div id="reset-confirm-box" class="hidden" style="margin-top: 10px; padding: 8px; border: 1px solid var(--danger-border); background-color: var(--danger-subtle); border-radius: 6px; font-size: 12px;">
+              <div style="margin-bottom: 6px; color: var(--fg-default);">Clear all checked items?</div>
+              <div style="display: flex; gap: 6px;">
+                <button type="button" id="btn-confirm-reset" class="gh-btn gh-btn-danger" style="padding: 2px 8px; font-size: 11px;">Confirm</button>
+                <button type="button" id="btn-cancel-reset" class="gh-btn" style="padding: 2px 8px; font-size: 11px;">Cancel</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Sticky Table of Contents -->
+        <div class="gh-box">
+          <div class="gh-box-header">
+            <span>Outline</span>
+            <button type="button" id="btn-toggle-mobile-toc" class="gh-btn" style="padding: 1px 7px; font-size: 11px;">Toggle</button>
+          </div>
+          <nav id="sidebar-toc-nav" class="gh-toc-list" aria-label="Table of Contents">
+            <!-- Populated dynamically -->
+          </nav>
+        </div>
+      </aside>
+
+      <!-- Right Column: Filter Bar + README Markdown Box -->
+      <main>
+        <!-- Instant Search & Multi-Facet Filter Bar -->
+        <section class="gh-filter-bar" aria-label="Filter resources">
+          <div class="gh-filter-row">
+            <div class="gh-search-wrap">
+              <svg class="gh-search-icon" aria-hidden="true" height="14" viewBox="0 0 16 16" width="14" fill="currentColor">
+                <path d="M10.68 11.74a6 6 0 0 1-7.922-8.982 6 6 0 0 1 8.982 7.922l3.04 3.04a.749.749 0 0 1-.326 1.275.749.749 0 0 1-.734-.215ZM11.5 7a4.499 4.499 0 1 0-8.997 0A4.499 4.499 0 0 0 11.5 7Z"></path>
+              </svg>
+              <input
+                type="text"
+                id="search-input"
+                class="gh-input"
+                placeholder="Filter 111 resources by title, instruction, tool, ABI, or keyword (press /)"
+                aria-label="Filter resources"
+              />
+              <button type="button" id="btn-clear-search" class="gh-clear-btn hidden" title="Clear search">&times;</button>
+            </div>
+
+            <select id="type-filter-select" class="gh-select" aria-label="Filter by resource type">
+              <option value="ALL">Type: All Categories</option>
+              <option value="Website / Roadmap">Website / Roadmap</option>
+              <option value="Book / PDF">Book / PDF</option>
+              <option value="Course / Video">Course / Video</option>
+              <option value="Tool / Repo">Tool / Repo</option>
+              <option value="Official Spec / Docs">Official Spec / Docs</option>
+              <option value="Interactive Lab / CTF">Interactive Lab / CTF</option>
+              <option value="Guide / Reference">Guide / Reference</option>
+            </select>
+          </div>
+
+          <div class="gh-filter-row" style="justify-content: space-between;">
+            <div class="gh-btn-group" role="group" aria-label="Filter by language">
+              <button type="button" class="gh-btn selected" data-lang-filter="ALL" id="lang-btn-all">All (111)</button>
+              <button type="button" class="gh-btn" data-lang-filter="English" id="lang-btn-en">English (99)</button>
+              <button type="button" class="gh-btn" data-lang-filter="Arabic" id="lang-btn-ar">Arabic (12)</button>
+            </div>
+
+            <div class="gh-btn-group" role="group" aria-label="Filter by completion status">
+              <button type="button" class="gh-btn selected" data-status-filter="ALL">Status: All</button>
+              <button type="button" class="gh-btn" data-status-filter="UNCHECKED">Unchecked</button>
+              <button type="button" class="gh-btn" data-status-filter="COMPLETED">Completed</button>
+            </div>
+
+            <div class="gh-btn-group">
+              <button type="button" id="btn-expand-all" class="gh-btn">Expand All</button>
+              <button type="button" id="btn-collapse-all" class="gh-btn">Collapse All</button>
+              <button type="button" id="btn-reset-filters" class="gh-btn gh-btn-danger hidden">Clear Filters</button>
+            </div>
+          </div>
+
+          <div style="font-size: 12px; color: var(--fg-muted);">
+            Showing <strong style="color: var(--fg-default);" id="visible-count-label">111</strong> resources across 7 curriculum domains.
+          </div>
+        </section>
+
+        <!-- GitHub README.md Container -->
+        <article class="gh-box">
+          <div class="gh-box-header">
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <svg aria-hidden="true" height="16" viewBox="0 0 16 16" width="16" fill="var(--fg-muted)">
+                <path d="M2 1.75C2 .784 2.784 0 3.75 0h6.586c.464 0 .909.184 1.237.513l2.914 2.914c.329.328.513.773.513 1.237v9.586A1.75 1.75 0 0 1 13.25 16h-9.5A1.75 1.75 0 0 1 2 14.25Zm1.75-.25a.25.25 0 0 0-.25.25v12.5c0 .138.112.25.25.25h9.5a.25.25 0 0 0 .25-.25V6h-2.75A1.75 1.75 0 0 1 9 4.25V1.5Zm6.75.062V4.25c0 .138.112.25.25.25h2.688l-.011-.013-2.914-2.914-.013-.011Z"></path>
+              </svg>
+              <span class="font-mono">README.md</span>
+            </div>
+            <span style="font-size: 12px; color: var(--fg-muted);">GitHub Primer Palette</span>
+          </div>
+
+          <div class="gh-readme-body">
+            <!-- Overview & Editorial Caveats -->
+            <section id="overview" class="toc-section" style="margin-bottom: 32px;">
+              <h1>Low-Level Computer Science, Systems Programming, and Security Resource Roadmap</h1>
+              <p>
+                This guide synthesizes a structured learning curriculum spanning foundational computer science, C and C++ systems programming, x86-64 assembly, Application Binary Interfaces (ABIs), operating system internals, microarchitectural performance tuning, and reverse engineering with binary exploitation. Every section pairs analytical context and architectural trade-offs with categorized links—covering official specifications, open textbooks, interactive labs, developer tools, and both English and Arabic courses or videos where available in each domain.
+              </p>
+
+              <!-- GitHub Markdown [!NOTE] Callout -->
+              <div class="gh-alert gh-alert-note" role="note">
+                <div class="gh-alert-title">
+                  <svg aria-hidden="true" height="16" viewBox="0 0 16 16" width="16" fill="var(--accent-fg)">
+                    <path d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8Zm8-6.5a6.5 6.5 0 1 0 0 13 6.5 6.5 0 0 0 0-13ZM6.5 7.75A.75.75 0 0 1 7.25 7h1a.75.75 0 0 1 .75.75v2.75h.25a.75.75 0 0 1 0 1.5h-2a.75.75 0 0 1 0-1.5h.25v-2h-.25a.75.75 0 0 1-.75-.75ZM8 6a1 1 0 1 1 0-2 1 1 0 0 1 0 2Z"></path>
+                  </svg>
+                  <span>Note — Editorial Vetting on roadmap.sh</span>
+                </div>
+                <p>
+                  Documentation on <code>roadmap.sh</code> varies in editorial vetting: official tracks undergo multi-stage review cycles with subject-matter experts according to <code>roadmap.sh</code> staff (though experienced C practitioners still critique omissions in draft layouts), whereas community-contributed roadmaps are explicitly marked as unverified by the platform <a href="#src-1" class="gh-ref-tag">[1]</a><a href="#src-2" class="gh-ref-tag">[2]</a><a href="#src-3" class="gh-ref-tag">[3]</a>.
+                </p>
+              </div>
+
+              <!-- GitHub Markdown [!WARNING] Callout -->
+              <div class="gh-alert gh-alert-warning" role="note">
+                <div class="gh-alert-title">
+                  <svg aria-hidden="true" height="16" viewBox="0 0 16 16" width="16" fill="var(--attention-fg)">
+                    <path d="M6.457 1.047c.659-1.234 2.427-1.234 3.086 0l6.082 11.378A1.75 1.75 0 0 1 14.082 15H1.918a1.75 1.75 0 0 1-1.543-2.575Zm1.763.707a.25.25 0 0 0-.44 0L1.698 13.132a.25.25 0 0 0 .22.368h12.164a.25.25 0 0 0 .22-.368Zm.53 3.996v2.5a.75.75 0 0 1-1.5 0v-2.5a.75.75 0 0 1 1.5 0ZM9 11a1 1 0 1 1-2 0 1 1 0 0 1 2 0Z"></path>
+                  </svg>
+                  <span>Warning — Language Coverage Across Advanced Tiers</span>
+                </div>
+                <p>
+                  Arabic-language materials offer accessible entry points for C, C++, data structures, and introductory computer science <a href="#src-4" class="gh-ref-tag">[4]</a><a href="#src-5" class="gh-ref-tag">[5]</a><a href="#src-6" class="gh-ref-tag">[6]</a><a href="#src-7" class="gh-ref-tag">[7]</a>, as well as foundational 8085/8086, IA-32, and x86 assembly plus introductory reverse engineering <a href="#src-8" class="gh-ref-tag">[8]</a><a href="#src-9" class="gh-ref-tag">[9]</a><a href="#src-10" class="gh-ref-tag">[10]</a><a href="#src-11" class="gh-ref-tag">[11]</a><a href="#src-12" class="gh-ref-tag">[12]</a>; however, no Arabic textbooks, primary specifications, or specialized courses were available for advanced domains such as x86-64 ABI internals, microarchitectural SIMD optimization, bare-metal Rust OS development, or glibc heap exploitation, making English primary references indispensable at those stages.
+                </p>
+              </div>
+            </section>
+
+            <!-- Empty Filter State -->
+            <div id="empty-filter-state" class="gh-empty-box hidden">
+              <p style="font-size: 16px; font-weight: 600; margin-bottom: 6px;">No matching resources found</p>
+              <p style="font-size: 13.5px; color: var(--fg-muted); margin-bottom: 14px;">Try adjusting your search query, language filter, resource type selector, or completion status filter.</p>
+              <button type="button" id="btn-empty-reset" class="gh-btn gh-btn-primary">Reset all filters</button>
+            </div>
+
+            <!-- Dynamic Sections Container (Sections 1 to 7) -->
+            <div id="roadmap-sections-container" class="gh-sections-stack"></div>
+
+            <!-- Sources Index Appendix -->
+            <section id="sources-appendix" class="toc-section" style="margin-top: 40px; padding-top: 20px; border-top: 1px solid var(--border-muted);">
+              <div class="gh-section-header">
+                <div class="gh-section-title-wrap">
+                  <a href="#sources-appendix" class="gh-anchor font-mono">#</a>
+                  <h2>Primary Sources Index ([1]–[113])</h2>
+                </div>
+                <button type="button" id="btn-toggle-sources" class="gh-btn" style="padding: 2px 8px; font-size: 11px;">Expand Sources</button>
+              </div>
+              <ol id="sources-list" class="hidden" style="padding-left: 22px; font-size: 12.5px; color: var(--fg-muted); line-height: 1.7; word-break: break-all;"></ol>
+            </section>
+          </div>
+        </article>
+      </main>
+    </div>
+  </div>
+
+  <!-- Toast Banner -->
+  <div id="gh-toast" class="gh-toast" role="status" aria-live="polite">
+    <svg aria-hidden="true" height="16" viewBox="0 0 16 16" width="16" fill="var(--success-fg)">
+      <path d="M13.78 4.22a.75.75 0 0 1 0 1.06l-7.25 7.25a.75.75 0 0 1-1.06 0L2.22 9.28a.751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018L6 10.94l6.72-6.72a.75.75 0 0 1 1.06 0Z"></path>
+    </svg>
+    <span id="gh-toast-msg">Action completed</span>
+  </div>
+
+  <!-- ========================================================================
+       COMPLETE UNABRIDGED DATA MODEL & INTERACTIVE APPLICATION LOGIC
+       ======================================================================== -->
+  <script>
+    (function () {
+      "use strict";
+
+      function refs(nums) {
+        return nums.map(function (n) {
+          return '<a href="#src-' + n + '" class="gh-ref-tag">[' + n + ']</a>';
+        }).join("");
+      }
+
+      const SOURCES = [
+        "https://roadmap.sh/r/cpp-extended",
+        "https://www.reddit.com/r/C_Programming/comments/1uea2as/were_building_a_c_programming_roadmap_on/",
+        "https://roadmap.sh/r/cybersecurity-expert-e394g",
+        "https://www.youtube.com/watch?v=fd7d_CV08i8",
+        "https://www.youtube.com/watch?v=35qTqtpQMxg",
+        "https://www.youtube.com/watch?v=MujxraH4Uws",
+        "https://www.youtube.com/watch?v=tICgYT0nIf4",
+        "https://www.youtube.com/watch?v=wEw1fu6Rbb8",
+        "https://www.youtube.com/watch?v=2d8GxsV1xeE",
+        "https://www.youtube.com/watch?v=LFoYDiFRdpM",
+        "https://www.youtube.com/watch?v=cd2yNNInMS4",
+        "https://www.youtube.com/watch?v=deu7pVquCW0",
+        "https://roadmap.sh/cpp/vs-csharp",
+        "https://roadmap.sh/cpp/vs-c",
+        "https://roadmap.sh/roadmaps",
+        "https://roadmap.sh/",
+        "https://roadmap.sh/computer-science",
+        "https://roadmap.sh/c",
+        "https://roadmap.sh/cpp",
+        "https://roadmap.sh/cyber-security",
+        "https://roadmap.sh/cyber-security/projects",
+        "https://www.cs.cmu.edu/~213/lectures/01-overview.pdf",
+        "https://www.reddit.com/r/programming/comments/g2x6ux/nand_to_tetris_is_a_great_course_for_learning_how/",
+        "https://www.simmc.org/webweb.ams3.cdn.digitaloceanspaces.com/data/simmcdev.webweb.ai.in/MCAdigitalbook/Operating-Systems-20240629T072015Z-001/Operating%20Systems_%20Three%20Easy%20Pieces%20(%20PDFDrive%20).pdf",
+        "https://www.nand2tetris.org/course",
+        "https://www.coursera.org/learn/build-a-computer",
+        "https://csdiy.wiki/en/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%B3%BB%E7%BB%9F%E5%9F%BA%E7%A1%80/CSAPP/",
+        "https://www.winda.app/explore/projects/cmu-15-213",
+        "https://github.com/ossu/computer-science/blob/master/coursepages/ostep/README.md",
+        "https://godbolt.org/",
+        "https://releases.llvm.org/2.0/docs/LangRef.html",
+        "https://www.nand2tetris.org/",
+        "https://www.cs.cmu.edu/~fp/courses/15213-s05/",
+        "https://www.cs.cmu.edu/~fp/courses/15213-s07/",
+        "https://github.com/sponsors/compiler-explorer",
+        "https://gist.github.com/mikesmullin/6259449",
+        "https://www.nasm.us/doc/",
+        "https://flatassembler.net/docs.php?article=manual",
+        "https://main.lv/writeup/gcc_inline_assembly.md",
+        "https://github.com/topics/assembly-x86-64?l=assembly",
+        "https://www.youtube.com/watch?v=dvGVP4NqQVo",
+        "https://www.cl72.org/120introAssem/assembly-language64-ubuntu.pdf",
+        "https://p.ost2.fyi/",
+        "https://oer.usk.ac.id/items/show/2823",
+        "https://uva-cs.github.io/pdr/book/x86-64bit-asm-chapter.pdf",
+        "https://github.com/awesome-simd/awesome-simd",
+        "https://www.felixcloutier.com/x86/",
+        "https://gist.github.com/aagontuk/177947659828c1fe6611d4971bfddd27",
+        "https://www.youtube.com/watch?v=Plfwir6aXf4",
+        "https://www.youtube.com/watch?v=MHJ632I9G2M",
+        "https://www.codermusings.com/resources/calling-conventions-cheat-sheet/",
+        "https://en.wikipedia.org/wiki/X86_calling_conventions",
+        "https://thejat.in/learn/system-v-amd64-calling-convention",
+        "https://stackoverflow.com/questions/18133812/where-is-the-x86-64-system-v-abi-documented",
+        "https://learn.microsoft.com/en-us/cpp/build/x64-calling-convention?view=msvc-170",
+        "https://hev.cc/posts/2015/system-v-amd64-abi-calling-conventions/",
+        "https://godbolt.org/noscript/z/JfCiPY",
+        "https://filippo.io/linux-syscall-table/",
+        "https://chromium.googlesource.com/chromiumos/docs/+/master/constants/syscalls.md",
+        "https://gcc.gnu.org/onlinedocs/gcc/Extended-Asm.html",
+        "https://gist.github.com/rtldg/91dd76b65748540717ed6f88d95a41b1",
+        "https://rustc-dev-guide.rust-lang.org/appendix/additional-resources.html",
+        "https://learn.microsoft.com/en-us/cpp/build/x64-software-conventions?view=msvc-170",
+        "https://www.youtube.com/watch?v=iJYx5lJaEKM",
+        "https://os.phil-opp.com/",
+        "https://github.com/cfenollosa/os-tutorial",
+        "https://github.com/cfenollosa/os-tutorial/blob/master/23-fixes/README.md",
+        "https://os.phil-opp.com/entering-longmode/",
+        "https://wiki.osdev.org/Setting_Up_Long_Mode",
+        "https://news.ycombinator.com/item?id=45420173",
+        "https://blog.wesleyac.com/posts/writing-an-os-in-rust",
+        "https://wiki.osdev.org/Talk:Entering_Long_Mode_Directly",
+        "https://wiki.osdev.org/Rust",
+        "https://github.com/leap0x7b/awesome-osdev/blob/main/README.md",
+        "https://www.agner.org/optimize/",
+        "https://uops.info/",
+        "https://github.com/tpn/pdfs/blob/master/Agner%20Fog%20-%20Optimizing%20Subroutines%20in%20Assembly%20Language%20-%20An%20optimization%20guide%20to%20x86%20platforms%20(2017-05-01).pdf",
+        "https://github.com/tpn/pdfs/blob/master/Agner%20Fog%20-%20Microarchitecture%20of%20Intel%2C%20AMD%20and%20VIA%20CPUs%20-%20An%20optimization%20guide%20for%20assembly%20programmers%20and%20compiler%20makers%20(2018-04-09).pdf",
+        "https://dokumen.pub/performance-analysis-and-tuning-on-modern-cpus-1nbsped-9798575614234.html",
+        "https://www.researchgate.net/publication/332215129_uopsinfo_Characterizing_Latency_Throughput_and_Port_Usage_of_Instructions_on_Intel_Microarchitectures",
+        "https://www.intel.com/content/www/us/en/docs/intrinsics-guide/index.html",
+        "https://github.com/algorithmica-org/algorithmica/blob/master/content/english/hpc/simd/intrinsics.md",
+        "https://alouettesu.github.io/Intrinsics/",
+        "https://www.brendangregg.com/Slides/Velocity2015_LinuxPerfTools.pdf",
+        "https://raw.githubusercontent.com/weedge/perf-book-cn/main/perf-book-cn.pdf",
+        "https://www.intel.com/content/www/us/en/content-details/794831/intel-intrinsics-guide-download.html",
+        "https://www.intel.com/content/dam/develop/external/us/en/documents/18072-347603.pdf",
+        "https://stackoverflow.com/questions/62349373/how-to-read-the-intel-intrinsics-guide",
+        "https://www.reddit.com/r/Assembly_language/comments/1taimob/best_way_to_learn_highperformance_assembly/",
+        "https://guyinatuxedo.github.io/",
+        "https://medium.com/@abdelaazizbenafghoul/%EF%B8%8F-roadmap-to-master-reverse-engineering-binary-exploitation-3483a833821b",
+        "https://www.reverseengineering.app/en/blog/best-reverse-engineering-tools",
+        "https://reflare.com/research/the-essential-free-tools-every-ctf-competitor-needs-in-their-arsenal",
+        "https://github.com/pwndbg/pwndbg",
+        "https://github.com/pwndbg/pwndbg/releases",
+        "https://github.com/hugsy/gef",
+        "https://lldb.llvm.org/",
+        "https://github.com/x64dbg/x64dbg",
+        "https://x64dbg.com/",
+        "https://medium.com/@derya.cortuk/reverse-engineering-tools-fccc151f0a82",
+        "https://www.getclaudeskills.com/skills/ctf-reverse-engineering-ljagiello",
+        "https://calif.io/research/security-tools-rce",
+        "https://crackmes.one/",
+        "https://pwn.college/intro-to-cybersecurity/binary-exploitation/",
+        "https://www.hoppersroppers.org/roadmap/training/pwning.html",
+        "https://github.com/sponsors/pwndbg",
+        "https://lldb.llvm.org/use/tutorial.html",
+        "https://llvm.org/devmtg/2016-03/Tutorials/LLDB-tutorial.pdf",
+        "https://www.geeksforgeeks.org/ethical-hacking/reverse-engineering-in-kali-linux/",
+        "https://data-flair.training/blogs/reverse-engineering-tools-in-kali-linux/",
+        "https://pwn.college/intro-re-pwn~5933fc84/",
+        "https://pwn.college/intro-re-pwn~5933fc84/reversing/",
+        "https://news.ycombinator.com/item?id=22582269"
+      ];
+
+      const ROADMAP_SECTIONS = [
+        {
+          id: "section-1",
+          number: 1,
+          title: "Foundational Roadmaps and Language Trade-Offs",
+          shortTitle: "1. Roadmaps & Language Trade-Offs",
+          contextHtml:
+            "<p>Choosing between C, C++, and managed systems languages shapes how closely your mental model tracks hardware execution " + refs([13, 14]) +
+            ". C acts as a minimal abstraction layer where statements map closely to assembly instructions, making it well suited for operating system kernels, embedded devices, and deterministic environments with strict limits " + refs([14]) +
+            ". C++ builds on that base with raw pointer control alongside Resource Acquisition Is Initialization (RAII), smart pointers (<code>std::unique_ptr</code>, <code>std::shared_ptr</code>), templates, and structured exceptions to manage complexity in large-scale systems—including web browsers such as Chrome and Firefox, video game engines, databases, and microsecond-sensitive high-frequency trading platforms " + refs([13, 14]) +
+            ". By contrast, <code>roadmap.sh</code> comparisons note that C# favors rapid enterprise and cloud development through smart memory handling, structured error recovery, and unified tooling, whereas C++ workflows span multiple compilers (GCC, Clang, MSVC) and build systems (CMake, Ninja, Make) " + refs([2, 13]) + ".</p>" +
+            "<p>Treat visual skill maps as directional outlines rather than complete syllabi " + refs([2, 15]) +
+            ". During a community review on <code>r/C_Programming</code> of the <code>roadmap.sh</code> C track, experienced developers pointed out that early layouts treated strings like a built-in data type rather than character arrays or pointers, used informal labels like \"booleans\" instead of standard keywords, and omitted essential systems topics including <code>_Bool</code>, <code>_Atomic</code>, <code>_BitInt</code>, <code>_Complex</code>, POSIX, mutexes and threading, <code>lldb</code>, <code>valgrind</code>, <code>strace</code>, and incompatibilities across GNU Make, BSD Make, Plan 9 <code>mk</code>, Meson, and Ninja build ecosystems " + refs([2]) + ".</p>",
+          resources: [
+            { id: "s1-1", title: "roadmap.sh Developer Roadmaps", url: "https://roadmap.sh/roadmaps", type: "Website", filterCategory: "Website / Roadmap", language: "English", descHtml: "Master directory of role-based and skill-based engineering tracks " + refs([15]) },
+            { id: "s1-2", title: "roadmap.sh Homepage and Linux Course", url: "https://roadmap.sh/", type: "Website / Video", filterCategory: "Website / Roadmap", language: "English", descHtml: "Entry hub featuring a 44-video (2h 36m) Linux and Command Line course plus Git and Internet fundamentals " + refs([16]) },
+            { id: "s1-3", title: "Computer Science Roadmap", url: "https://roadmap.sh/computer-science", type: "Website", filterCategory: "Website / Roadmap", language: "English", descHtml: "Self-taught CS curriculum covering CPU caches, processes, threads, data structures, and system design " + refs([17]) },
+            { id: "s1-4", title: "C Programming Roadmap", url: "https://roadmap.sh/c", type: "Website", filterCategory: "Website / Roadmap", language: "English", descHtml: "Official C language track from setup and bitwise operators to control flow " + refs([18]) },
+            { id: "s1-5", title: "Reddit C Roadmap Critique", url: "https://www.reddit.com/r/C_Programming/comments/1uea2as/were_building_a_c_programming_roadmap_on/", type: "Forum Discussion", filterCategory: "Guide / Reference", language: "English", descHtml: "Practitioner feedback highlighting missing C types (<code>_Bool</code>, <code>_Atomic</code>, <code>_BitInt</code>, <code>_Complex</code>), POSIX, <code>valgrind</code>, <code>strace</code>, and build tools " + refs([2]) },
+            { id: "s1-6", title: "clib C Package Manager", url: "https://github.com/clibs/clib", type: "Tool / Repo", filterCategory: "Tool / Repo", language: "English", descHtml: "C-specific package manager recommended in community C discussions " + refs([2]) },
+            { id: "s1-7", title: "BSDBuild", url: "https://bsdbuild.hypertriton.com/", type: "Tool / Website", filterCategory: "Tool / Repo", language: "English", descHtml: "Cross-platform C build system cited by systems practitioners " + refs([2]) },
+            { id: "s1-8", title: "C++ Developer Roadmap", url: "https://roadmap.sh/cpp", type: "Website", filterCategory: "Website / Roadmap", language: "English", descHtml: "Official structured C++ path from environment setup through advanced language mechanics " + refs([19]) },
+            { id: "s1-9", title: "C++ Extended Community Roadmap", url: "https://roadmap.sh/r/cpp-extended", type: "Website", filterCategory: "Website / Roadmap", language: "English", descHtml: "Unverified community map by Ivan Kalashnikov adding preprocessing, Rule of Three/Five/Zero, RAII, move semantics, spinlocks, Vulkan, and gRPC " + refs([1]) },
+            { id: "s1-10", title: "C++ vs. C Comparison Guide", url: "https://roadmap.sh/cpp/vs-c", type: "Article", filterCategory: "Guide / Reference", language: "English", descHtml: "Technical comparison of minimalism and OS dev (C) versus RAII, templates, and large-scale systems (C++) " + refs([14]) },
+            { id: "s1-11", title: "C++ vs. C# Comparison Guide", url: "https://roadmap.sh/cpp/vs-csharp", type: "Article", filterCategory: "Guide / Reference", language: "English", descHtml: "Trade-off guide covering runtime control, memory handling, and compiler/build ecosystems " + refs([13]) },
+            { id: "s1-12", title: "Cyber Security Roadmap", url: "https://roadmap.sh/cyber-security", type: "Website", filterCategory: "Website / Roadmap", language: "English", descHtml: "Official security track covering IT fundamentals, networking, and CTF platforms (HackTheBox, TryHackMe, VulnHub) " + refs([20]) },
+            { id: "s1-13", title: "Cyber Security Projects", url: "https://roadmap.sh/cyber-security/projects", type: "Practice Labs", filterCategory: "Interactive Lab / CTF", language: "English", descHtml: "Hands-on project briefs such as building a File Integrity Checker " + refs([21]) },
+            { id: "s1-14", title: "Tech Nerd Low-Level Security Roadmap", url: "https://roadmap.sh/r/cybersecurity-expert-e394g", type: "Website", filterCategory: "Website / Roadmap", language: "English", descHtml: "Unverified community map by Yyax13 targeting low-level foundations, binary exploitation, RE, and malware development " + refs([3]) }
+          ]
+        },
+        {
+          id: "section-2",
+          number: 2,
+          title: "Computer Architecture, Systems Textbooks, and C and C++ Foundations",
+          shortTitle: "2. Architecture, Systems & C/C++",
+          contextHtml:
+            "<p>Bridging high-level code to physical hardware requires mastering three complementary layers: digital logic up to the CPU, the programmer's view of machine execution and memory hierarchies, and operating system virtualization and concurrency " + refs([22, 23, 24]) +
+            ". <em>Nand to Tetris</em> (<em>The Elements of Computing Systems</em> by Noam Nisan and Shimon Schocken) builds computer systems across 12 hands-on projects divided into two parts—with Part I progressing from Boolean gates and ALUs through memory, machine language, CPU architecture, and an assembler " + refs([23, 25, 26]) +
+            ". In an <code>r/programming</code> discussion, practitioners recommend pairing hands-on hardware simulation with Charles Petzold's <em>CODE</em> (accessible even with no programming background) while noting Ben Eater's electronics projects as complementary inspiration " + refs([23]) + ".</p>" +
+            "<p>At the systems programming tier, Carnegie Mellon University's 15-213 course (<em>Computer Systems: A Programmer's Perspective</em>, or CS:APP) connects C data representation and assembly control flow to cache and virtual memory effects, code optimization, linking, exceptional control flow, system I/O, and network concurrency " + refs([22, 27, 28]) +
+            ". Its well-known \"bomb\" assignment requires students to disassemble and reverse engineer compiled executables with a debugger to recover six input strings " + refs([29]) +
+            ". Notably, CMU's Fall 2026 lecture overview warns that LLMs easily spiral into nonsense on even simple low-level tasks and prohibits all AI tools and editor autocomplete for 15-213 coursework " + refs([22]) +
+            ". To round out OS foundations, <em>Operating Systems: Three Easy Pieces</em> (OSTEP) frames operating systems around virtualization, concurrency, and persistence " + refs([24]) + ".</p>" +
+            "<p>For learners starting C, C++, or compiler analysis, Arabic video lectures covering CS50 C functions, rapid C++ syntax, and data structures in C pair cleanly with <a href=\"https://godbolt.org/\" target=\"_blank\" rel=\"noopener noreferrer\">Compiler Explorer (Godbolt)</a>, which displays compiler-generated assembly interactively and lets you observe LLVM Intermediate Representation (IR) concepts " + refs([5, 6, 30, 31]) + ".</p>",
+          resources: [
+            { id: "s2-1", title: "Nand to Tetris Official Site", url: "https://www.nand2tetris.org/", type: "Website / Course", filterCategory: "Website / Roadmap", language: "English", descHtml: "Free open-source lecture notes and projects used across 400+ universities and bootcamps " + refs([32]) },
+            { id: "s2-2", title: "Nand to Tetris Projects", url: "https://www.nand2tetris.org/course", type: "Practice Labs", filterCategory: "Interactive Lab / CTF", language: "English", descHtml: "Complete 12-project sequence spanning hardware simulation to software stack " + refs([25]) },
+            { id: "s2-3", title: "Build a Modern Computer (Coursera)", url: "https://www.coursera.org/learn/build-a-computer", type: "Video Course", filterCategory: "Course / Video", language: "English", descHtml: "Part I video track (8 modules, 44 hours total); payment required for completion certificate " + refs([26, 32]) },
+            { id: "s2-4", title: "The Elements of Computing Systems", url: "https://www.amazon.com/Elements-Computing-Systems-Building-Principles-dp-0262640686/dp/0262640686/", type: "Book", filterCategory: "Book / PDF", language: "English", descHtml: "Companion textbook for Nand to Tetris by Nisan and Schocken " + refs([23]) },
+            { id: "s2-5", title: "Nand to Tetris Community Review", url: "https://www.reddit.com/r/programming/comments/g2x6ux/nand_to_tetris_is_a_great_course_for_learning_how/", type: "Forum Discussion", filterCategory: "Guide / Reference", language: "English", descHtml: "Practitioner comparisons of Nand to Tetris, Petzold's <em>CODE</em>, and Ben Eater " + refs([23]) },
+            { id: "s2-6", title: "CMU 15-213 Fall 2026 Overview Slides", url: "https://www.cs.cmu.edu/~213/lectures/01-overview.pdf", type: "Lecture PDF", filterCategory: "Book / PDF", language: "English", descHtml: "Course scope, cache/memory performance effects, and Fall 2026 ban on AI/autocomplete tools " + refs([22]) },
+            { id: "s2-7", title: "CMU 15-213 Study Hub (Winda)", url: "https://www.winda.app/explore/projects/cmu-15-213", type: "Course Index", filterCategory: "Course / Video", language: "English", descHtml: "Organized lectures and slides from Bits/Bytes and Machine Programming through Concurrency " + refs([28]) },
+            { id: "s2-8", title: "CS:APP Self-Study Guide (CSDIY)", url: "https://csdiy.wiki/en/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%B3%BB%E7%BB%9F%E5%9F%BA%E7%A1%80/CSAPP/", type: "Study Guide", filterCategory: "Guide / Reference", language: "English", descHtml: "Study roadmap for <em>CS:APP 3/E</em> and its 11 open-source lab projects " + refs([27]) },
+            { id: "s2-9", title: "CMU 15-213 Spring 2005 Archive", url: "https://www.cs.cmu.edu/~fp/courses/15213-s05/", type: "Course Archive", filterCategory: "Course / Video", language: "English", descHtml: "Frank Pfenning's syllabus referencing <em>The C Programming Language (2nd ed.)</em> " + refs([33]) },
+            { id: "s2-10", title: "CMU 15-213 Spring 2007 Archive", url: "https://www.cs.cmu.edu/~fp/courses/15213-s07/", type: "Course Archive", filterCategory: "Course / Video", language: "English", descHtml: "Archived syllabus adding Cyclone type-safe C dialect readings " + refs([34]) },
+            { id: "s2-11", title: "OSSU OSTEP and CMU 15-213 Guide", url: "https://github.com/ossu/computer-science/blob/master/coursepages/ostep/README.md", type: "Curriculum Guide", filterCategory: "Guide / Reference", language: "English", descHtml: "Maps Machine-Level Programming I–V, Linking, and the bomb lab into OS study " + refs([29]) },
+            { id: "s2-12", title: "Operating Systems: Three Easy Pieces (PDF)", url: "https://www.simmc.org/webweb.ams3.cdn.digitaloceanspaces.com/data/simmcdev.webweb.ai.in/MCAdigitalbook/Operating-Systems-20240629T072015Z-001/Operating%20Systems_%20Three%20Easy%20Pieces%20(%20PDFDrive%20).pdf", type: "Book PDF", filterCategory: "Book / PDF", language: "English", descHtml: "Full OSTEP textbook covering virtualization, concurrency, and persistence " + refs([24]) },
+            { id: "s2-13", title: "CS50 in Arabic: Functions in C", url: "https://www.youtube.com/watch?v=MujxraH4Uws", type: "Video", filterCategory: "Course / Video", language: "Arabic", descHtml: "Detailed 30-minute Arabic walkthrough of C functions by Abdelrahman Gamal " + refs([6]) },
+            { id: "s2-14", title: "Learn C++ in 5 Hours", url: "https://www.youtube.com/watch?v=35qTqtpQMxg", type: "Video", filterCategory: "Course / Video", language: "Arabic", descHtml: "Fast-paced Arabic C++ programming video " + refs([5]) },
+            { id: "s2-15", title: "Data Structures in C", url: "https://learrnsimply.com/courses/data-structure-c/", type: "Course Website", filterCategory: "Course / Video", language: "Arabic", descHtml: "Structured Arabic data structures course built around C " + refs([5]) },
+            { id: "s2-16", title: "Arabic Book Intro Video (Ahmed Adel)", url: "https://www.youtube.com/watch?v=tICgYT0nIf4", type: "Video", filterCategory: "Course / Video", language: "Arabic", descHtml: "Arabic video linking to a downloadable book via Gumroad and Telegram (book syllabus not detailed) " + refs([7]) },
+            { id: "s2-17", title: "Gumroad Book Download (Ahmed Adel)", url: "https://ahmedadell.gumroad.com/l/vccmu", type: "Book / eBook", filterCategory: "Book / PDF", language: "Arabic", descHtml: "Digital book download page referenced from Ahmed Adel's tutorial video " + refs([7]) },
+            { id: "s2-18", title: "Arabic CS and Programming Video", url: "https://www.youtube.com/watch?v=fd7d_CV08i8", type: "Video", filterCategory: "Course / Video", language: "Arabic", descHtml: "Foundational Arabic computer science and programming talk by Mostafa Hegab (<code>kmr script</code>) " + refs([4]) },
+            { id: "s2-19", title: "Compiler Explorer (Godbolt)", url: "https://godbolt.org/", type: "Web Tool", filterCategory: "Tool / Repo", language: "English", descHtml: "Interactive compiler-to-assembly explorer that compiles and runs code (<a href=\"https://github.com/sponsors/compiler-explorer\" target=\"_blank\" rel=\"noopener noreferrer\">GitHub Sponsors</a>) " + refs([30, 35]) },
+            { id: "s2-20", title: "LLVM Assembly Language Reference", url: "https://releases.llvm.org/2.0/docs/LangRef.html", type: "Documentation", filterCategory: "Official Spec / Docs", language: "English", descHtml: "Explains LLVM's SSA intermediate representation (archived snapshot from LLVM 2.0) " + refs([31]) }
+          ]
+        },
+        {
+          id: "section-3",
+          number: 3,
+          title: "x86 and x86-64 Assembly Language and Machine Encoding",
+          shortTitle: "3. x86 / x86-64 Assembly & Encoding",
+          contextHtml:
+            "<p>Learning assembly cleanly requires distinguishing processor modes from assembler syntax. Modern x86-64 applications execute in 64-bit Long Mode after the operating system transitions upward from legacy Real Mode through Protected Mode " + refs([36]) +
+            ". Among major assemblers, NASM is case-sensitive, requires square brackets for memory references, omits variable types, does not support <code>ASSUME</code> or memory models, and documents modern APX instruction extensions " + refs([37]) +
+            ", while Flat Assembler (FASM) uses multiple passes to optimize generated machine-code size on x86 processors " + refs([38]) +
+            ". GNU Assembler (<code>GAS</code>) examples commonly use AT&amp;T syntax, and GCC inline assembly supports switching between Intel and AT&amp;T syntax " + refs([39, 40]) + ".</p>" +
+            "<p>Moving from reading assembly to reverse engineering requires understanding binary instruction encoding. Personal technical notes on x86-64 encoding outline how instructions combine optional legacy and REX prefixes (where a REX prefix preceding a legacy prefix is ignored, and only the last REX prefix applies), 1-byte to 3-byte opcodes (<code>0x0F</code>, <code>0x0F38</code>, and <code>0x0F3A</code> escape bytes), and <code>ModR/M</code> fields—where <code>ModR/M.reg</code> extends single-operand opcodes—while immediate operands are capped (noted in that guide as up to an unsigned doubleword, <code>2³²</code>) " + refs([36]) +
+            ". To build fluency across theory and practice, pair OpenSecurityTraining2's <code>Arch1001</code> course and Ed Jorgensen's Ubuntu x86-64 textbook with Arabic-language courses covering 8085/8086 MASM, IA-32 registers, subroutines, and compiler-versus-assembler fundamentals " + refs([8, 10, 12, 41, 42, 43]) + ".</p>",
+          resources: [
+            { id: "s3-1", title: "OpenSecurityTraining2 (Arch1001 & Dbg2011)", url: "https://p.ost2.fyi/", type: "Interactive Course", filterCategory: "Course / Video", language: "English", descHtml: "Free technical tracks including <code>Arch1001: x86-64 Assembly</code> and <code>Dbg2011: Debuggers</code> " + refs([43]) },
+            { id: "s3-2", title: "x86-64 Assembly Language Programming with Ubuntu", url: "https://www.cl72.org/120introAssem/assembly-language64-ubuntu.pdf", type: "Book PDF", filterCategory: "Book / PDF", language: "English", descHtml: "Creative Commons university textbook by Ed Jorgensen, Ph.D. (v1.1.40, January 2020) " + refs([42]) },
+            { id: "s3-3", title: "OER Entry for Jorgensen x86-64 Text", url: "https://oer.usk.ac.id/items/show/2823", type: "Library Record", filterCategory: "Guide / Reference", language: "English", descHtml: "Catalog entry (dated 2019; PDF attachment prompts for a password) citing <a href=\"http://www.egr.unlv.edu/~ed/assembly64.pdf\" target=\"_blank\" rel=\"noopener noreferrer\">UNLV Source PDF</a> " + refs([44]) },
+            { id: "s3-4", title: "UVA CS 64-bit x86 Assembly Chapter", url: "https://uva-cs.github.io/pdr/book/x86-64bit-asm-chapter.pdf", type: "Book Chapter PDF", filterCategory: "Book / PDF", language: "English", descHtml: "Concise academic introduction to core 64-bit x86 instructions " + refs([45]) },
+            { id: "s3-5", title: "NASM Official Documentation", url: "https://www.nasm.us/doc/", type: "Documentation", filterCategory: "Official Spec / Docs", language: "English", descHtml: "Authoritative manual covering ELF64 formats, macros, <code>.bss</code> allocation, MASM differences, and APX syntax " + refs([37]) },
+            { id: "s3-6", title: "Flat Assembler (FASM) Manual", url: "https://flatassembler.net/docs.php?article=manual", type: "Documentation", filterCategory: "Official Spec / Docs", language: "English", descHtml: "Official reference for the fast multi-pass x86 assembler " + refs([38]) },
+            { id: "s3-7", title: "Felix Cloutier x86/amd64 Reference", url: "https://www.felixcloutier.com/x86/", type: "Reference Website", filterCategory: "Guide / Reference", language: "English", descHtml: "Searchable HTML guide to x86 and amd64 instruction semantics " + refs([46, 47]) },
+            { id: "s3-8", title: "Notes on x86-64 Assembly and Machine Code", url: "https://gist.github.com/mikesmullin/6259449", type: "Technical Gist", filterCategory: "Guide / Reference", language: "English", descHtml: "Community notes on CPU modes, REX prefixes, ModR/M, and <a href=\"https://en.wikipedia.org/wiki/X86_memory_segmentation\" target=\"_blank\" rel=\"noopener noreferrer\">x86 Segmentation</a> " + refs([36]) },
+            { id: "s3-9", title: "x86 Encoding and Opcode References", url: "http://ref.x86asm.net/", type: "Reference Websites", filterCategory: "Guide / Reference", language: "English", descHtml: "Complex opcode table paired in encoding guides with <a href=\"http://www.c-jump.com/CIS77/CPU/x86/lecture.html#X77_0010_real_encoding\" target=\"_blank\" rel=\"noopener noreferrer\">C-Jump x86 Encoding</a> and <a href=\"https://www-user.tu-chemnitz.de/~heha/viewchm.php/hs/x86.chm/x86.htm\" target=\"_blank\" rel=\"noopener noreferrer\">TU Chemnitz x86 CHM</a> " + refs([36]) },
+            { id: "s3-10", title: "Resources on x86_64 ISA", url: "https://gist.github.com/aagontuk/177947659828c1fe6611d4971bfddd27", type: "Curated Gist", filterCategory: "Guide / Reference", language: "English", descHtml: "Index of x86-64 guides, status flags, and minimal Linux <code>nasm -f elf64</code> / <code>ld</code> linking commands " + refs([48]) },
+            { id: "s3-11", title: "GitHub x86-64 Assembly Projects", url: "https://github.com/topics/assembly-x86-64?l=assembly", type: "Code Repositories", filterCategory: "Tool / Repo", language: "English", descHtml: "Includes <code>yds12/x64-roadmap</code>, <code>mikeroyal/Assembly-Guide</code>, <code>RealNeGate/AsmSnake</code>, <code>linuxthor/iamdynamic</code>, and <code>dzik143/pe64-no-imports</code> " + refs([40]) },
+            { id: "s3-12", title: "x86 Assembly Language Playlist (Ahmed Sallam)", url: "https://www.youtube.com/watch?v=2d8GxsV1xeE", type: "Video Playlist", filterCategory: "Course / Video", language: "Arabic", descHtml: "Structured Arabic video playlist on x86 assembly programming " + refs([9]) },
+            { id: "s3-13", title: "x86 Assembly Language in Arabic (Courseset)", url: "https://www.youtube.com/watch?v=LFoYDiFRdpM", type: "Video / Course", filterCategory: "Course / Video", language: "Arabic", descHtml: "Video intro paired with the full <a href=\"https://www.courseset.com/course/learn-x86-assembly-language-in-arabic/\" target=\"_blank\" rel=\"noopener noreferrer\">Courseset x86 Assembly Course</a> " + refs([10]) },
+            { id: "s3-14", title: "Assembly Basics Lesson 1 (Ziad Rabeay)", url: "https://www.youtube.com/watch?v=Plfwir6aXf4", type: "Video", filterCategory: "Course / Video", language: "Arabic", descHtml: "First installment of Arabic assembly fundamentals series " + refs([49]) },
+            { id: "s3-15", title: "Assembly Basics Lesson 2 (Ziad Rabeay)", url: "https://www.youtube.com/watch?v=MHJ632I9G2M", type: "Video", filterCategory: "Course / Video", language: "Arabic", descHtml: "Second installment of Arabic assembly fundamentals series " + refs([50]) },
+            { id: "s3-16", title: "IA-32 and Registers Lecture", url: "https://www.youtube.com/watch?v=deu7pVquCW0", type: "Video", filterCategory: "Course / Video", language: "Arabic", descHtml: "Arabic lecture on IA-32 registers linked to <a href=\"http://sallamah.weebly.com\" target=\"_blank\" rel=\"noopener noreferrer\">sallamah.weebly.com</a> " + refs([12]) },
+            { id: "s3-17", title: "Computer Architecture and Subroutines (Eng. Ahmed Sultan)", url: "https://www.youtube.com/watch?v=dvGVP4NqQVo", type: "Video", filterCategory: "Course / Video", language: "Arabic", descHtml: "Academic Arabic lecture (FCAI-BSU) on machine language, assemblers, and subroutines " + refs([41]) },
+            { id: "s3-18", title: "8085/8086 16-bit MASM Assembly Tutorial", url: "https://www.youtube.com/watch?v=wEw1fu6Rbb8", type: "Video", filterCategory: "Course / Video", language: "Arabic", descHtml: "Legacy 16-bit 8085/8086 and MASM debugger introduction " + refs([8]) },
+            { id: "s3-19", title: "Compiler, Assembler, and RE Video Link", url: "https://www.youtube.com/watch?v=cd2yNNInMS4", type: "Video", filterCategory: "Course / Video", language: "Arabic", descHtml: "Video entry referencing programming languages, compilers/assemblers, and Ghidra beginner software cracking " + refs([11]) }
+          ]
+        },
+        {
+          id: "section-4",
+          number: 4,
+          title: "Application Binary Interfaces, Calling Conventions, and System Calls",
+          shortTitle: "4. ABIs, Calling Conventions & Syscalls",
+          contextHtml:
+            "<p>Hand-written assembly, reverse-engineered binaries, and cross-language bindings fail unless they obey the host operating system's Application Binary Interface (ABI) " + refs([51]) +
+            ". On 64-bit x86 platforms, Unix-like operating systems follow the <strong>System V AMD64 ABI</strong>, whereas Windows and pre-boot UEFI follow the <strong>Microsoft x64 calling convention</strong> " + refs([52, 53]) +
+            ". Violating callee-saved register rules causes hard-to-debug corruption, while failing to maintain 16-byte stack alignment breaks compiler-generated SSE code (which motivated GCC and Linux ABI updates enforcing 16-byte alignment) " + refs([51, 54]) +
+            ". On Windows x64, callers must always allocate 32 bytes of shadow space on the stack prior to every call—even for functions with fewer than four parameters—so the callee can spill <code>RCX</code>, <code>RDX</code>, <code>R8</code>, and <code>R9</code> " + refs([51, 52, 55]) +
+            ". System V omits shadow space, placing the seventh integer argument adjacent to the return address on entry, and provides a 128-byte red zone below <code>RSP</code> " + refs([51, 56]) + ".</p>" +
+            '<div id="abi-comparison-matrix" style="margin: 18px 0;">' +
+            '<h3>System V AMD64 vs. Microsoft x64 ABI Comparison Matrix</h3>' +
+            '<div class="gh-table-wrap"><table class="gh-table">' +
+            '<thead><tr>' +
+            '<th style="width: 26%;">ABI Rule</th>' +
+            '<th style="width: 37%;">System V AMD64 (Linux / macOS / BSD)</th>' +
+            '<th style="width: 37%;">Microsoft x64 (Windows / UEFI)</th>' +
+            '</tr></thead><tbody>' +
+            '<tr><td><strong>First integer/pointer arguments</strong></td><td><code>RDI</code>, <code>RSI</code>, <code>RDX</code>, <code>RCX</code>, <code>R8</code>, <code>R9</code> (6 registers) ' + refs([51, 53]) + '</td><td><code>RCX</code>, <code>RDX</code>, <code>R8</code>, <code>R9</code> (4 registers) ' + refs([51, 52]) + '</td></tr>' +
+            '<tr><td><strong>Floating-point arguments</strong></td><td><code>XMM0</code> through <code>XMM7</code> ' + refs([57]) + '</td><td><code>XMM0</code> through <code>XMM3</code> ' + refs([52]) + '</td></tr>' +
+            '<tr><td><strong>Integer/pointer return</strong></td><td><code>RAX</code> (2nd integer/struct in <code>RDX</code>; large structs use hidden ptr in <code>RDI</code>) ' + refs([51, 53]) + '</td><td><code>RAX</code> (oversized structs use hidden ptr in <code>RCX</code>) ' + refs([51, 52]) + '</td></tr>' +
+            '<tr><td><strong>Floating-point return</strong></td><td><code>XMM0</code> ' + refs([51]) + '</td><td><code>XMM0</code> ' + refs([51, 52]) + '</td></tr>' +
+            '<tr><td><strong>Stack alignment at <code>call</code></strong></td><td>16-byte aligned ' + refs([51, 54]) + '</td><td>16-byte aligned ' + refs([51, 52]) + '</td></tr>' +
+            '<tr><td><strong>Caller-allocated shadow space</strong></td><td>None ' + refs([51, 56]) + '</td><td>Mandatory 32 bytes for all calls ' + refs([51, 52, 55]) + '</td></tr>' +
+            '<tr><td><strong>Red zone below <code>RSP</code></strong></td><td>128 bytes ' + refs([51]) + '</td><td>None ' + refs([51]) + '</td></tr>' +
+            '<tr><td><strong>Volatile vs. non-volatile GPRs</strong></td><td>Callee preserves <code>RBP</code> (if used) and psABI callee-saved registers ' + refs([51, 53]) + '</td><td>Volatile: <code>RAX</code>, <code>RCX</code>, <code>RDX</code>, <code>R8</code>–<code>R11</code>; Non-volatile: <code>RBX</code>, <code>RBP</code>, <code>RDI</code>, <code>RSI</code>, <code>RSP</code>, <code>R12</code>–<code>R15</code> ' + refs([52]) + '</td></tr>' +
+            '</tbody></table></div></div>' +
+            "<p>System calls cross the user-kernel boundary through a separate calling convention: on Linux x86-64, kernel headers expose numbers as <code>__NR_xxx</code> while libc headers expose matching <code>SYS_xxx</code> constants, with syscall return values placed in <code>%rax</code> " + refs([58, 59]) +
+            ". When embedding hardware instructions such as <code>RDRAND</code> or direct Linux syscalls like <code>mmap</code> inside C/C++, GCC Extended <code>asm</code> syntax relies on explicit input/output operands, modifiers, and clobber lists " + refs([39, 60]) +
+            ". Because outdated ABI PDFs remain indexed online, verify edge cases like struct passing or narrow-argument sign extension against the actively maintained GitLab <code>x86-psABIs</code> builds rather than 2014 drafts " + refs([54, 61]) + ".</p>",
+          resources: [
+            { id: "s4-1", title: "System V AMD64 psABI GitLab Builds", url: "https://gitlab.com/x86-psABIs/x86-64-ABI/-/jobs", type: "Official Spec", filterCategory: "Official Spec / Docs", language: "English", descHtml: "Authoritative auto-built PDFs from the System V x86-64 psABI LaTeX repository " + refs([54, 61]) },
+            { id: "s4-2", title: "System V ABI Documentation Thread", url: "https://stackoverflow.com/questions/18133812/where-is-the-x86-64-system-v-abi-documented", type: "Reference Guide", filterCategory: "Guide / Reference", language: "English", descHtml: "Explains gABI vs. psABI, Clang narrow-arg behavior, and links <a href=\"https://refspecs.linuxfoundation.org/\" target=\"_blank\" rel=\"noopener noreferrer\">Linux Foundation Refspecs</a> and <a href=\"https://uclibc.org/specs.html\" target=\"_blank\" rel=\"noopener noreferrer\">uClibc Specs</a> " + refs([54]) },
+            { id: "s4-3", title: "Legacy x86-64 psABI v0.99.7 PDF", url: "https://uclibc.org/docs/psABI-x86_64.pdf", type: "Archived PDF", filterCategory: "Book / PDF", language: "English", descHtml: "Outdated 2014 copy; useful historical reference, superseded by GitLab v1.0+ builds " + refs([54]) },
+            { id: "s4-4", title: "SCO System V Generic ABI (gABI)", url: "https://www.sco.com/developers/gabi/", type: "Official Spec", filterCategory: "Official Spec / Docs", language: "English", descHtml: "Cross-platform ELF object format and linking specification " + refs([62]) },
+            { id: "s4-5", title: "Microsoft x64 Calling Convention", url: "https://learn.microsoft.com/en-us/cpp/build/x64-calling-convention?view=msvc-170", type: "Official Docs", filterCategory: "Official Spec / Docs", language: "English", descHtml: "Official Windows four-register fast-call and shadow store specification " + refs([55]) },
+            { id: "s4-6", title: "Microsoft x64 Software Conventions", url: "https://learn.microsoft.com/en-us/cpp/build/x64-software-conventions?view=msvc-170", type: "Official Docs", filterCategory: "Official Spec / Docs", language: "English", descHtml: "Covers x64 ABI, type alignment, aggregate/union layout, and 2 GB PE32+ image limits " + refs([63]) },
+            { id: "s4-7", title: "Rustc Dev Guide ABI Appendix", url: "https://rustc-dev-guide.rust-lang.org/appendix/additional-resources.html", type: "Documentation", filterCategory: "Official Spec / Docs", language: "English", descHtml: "Consolidates SysV gABI alongside Windows <code>x64</code>, <a href=\"https://learn.microsoft.com/en-us/cpp/cpp/cdecl\" target=\"_blank\" rel=\"noopener noreferrer\">cdecl</a>, and <a href=\"https://learn.microsoft.com/en-us/cpp/cpp/stdcall\" target=\"_blank\" rel=\"noopener noreferrer\">stdcall</a> specs " + refs([62]) },
+            { id: "s4-8", title: "Calling Conventions Cheat Sheet", url: "https://www.codermusings.com/resources/calling-conventions-cheat-sheet/", type: "Cheat Sheet", filterCategory: "Guide / Reference", language: "English", descHtml: "Side-by-side reference for System V x86-64, Windows x64, and ARM64 (<code>AAPCS64</code>) " + refs([51]) },
+            { id: "s4-9", title: "Wikipedia: x86 Calling Conventions", url: "https://en.wikipedia.org/wiki/X86_calling_conventions", type: "Reference", filterCategory: "Guide / Reference", language: "English", descHtml: "Broad overview of 32-bit and 64-bit register rules (lacks full SysV struct-packing rules) " + refs([52, 54]) },
+            { id: "s4-10", title: "System V AMD64 Tutorial (TheJat)", url: "https://thejat.in/learn/system-v-amd64-calling-convention", type: "Tutorial", filterCategory: "Guide / Reference", language: "English", descHtml: "Structured overview of register usage, stack frames, and cleanup " + refs([53]) },
+            { id: "s4-11", title: "System V Stack Frame Post (hev.cc)", url: "https://hev.cc/posts/2015/system-v-amd64-abi-calling-conventions/", type: "Blog Post", filterCategory: "Guide / Reference", language: "English", descHtml: "Highlights absence of shadow space and stack offset of the 7th integer argument " + refs([56]) },
+            { id: "s4-12", title: "System V AMD64 ABI Video Walkthrough", url: "https://www.youtube.com/watch?v=iJYx5lJaEKM", type: "Video", filterCategory: "Course / Video", language: "English", descHtml: "Visual trace of stack frames, <code>RBP</code>/<code>RSP</code>, prologues, epilogues, and arguments 1–6 " + refs([64]) },
+            { id: "s4-13", title: "Godbolt SysV64 NASM Example", url: "https://godbolt.org/noscript/z/JfCiPY", type: "Interactive Tool", filterCategory: "Tool / Repo", language: "English", descHtml: "Live SysV64 calling convention example inside Compiler Explorer " + refs([57]) },
+            { id: "s4-14", title: "rtldg ABI Reference Gist", url: "https://gist.github.com/rtldg/91dd76b65748540717ed6f88d95a41b1", type: "Notes / Gist", filterCategory: "Guide / Reference", language: "English", descHtml: "Quick notes linking SysV GitLab psABI PDFs and Microsoft shadow-space rules " + refs([61]) },
+            { id: "s4-15", title: "Searchable Linux x86-64 Syscall Table", url: "https://filippo.io/linux-syscall-table/", type: "Web Reference", filterCategory: "Guide / Reference", language: "English", descHtml: "Fuzzy-searchable table built from Linux <code>6.16-rc1</code> <code>syscall_64.tbl</code> and <code>syscalls.h</code> " + refs([58]) },
+            { id: "s4-16", title: "Chromium OS Multi-Arch Syscall Tables", url: "https://chromium.googlesource.com/chromiumos/docs/+/HEAD/constants/syscalls.md", type: "Documentation", filterCategory: "Official Spec / Docs", language: "English", descHtml: "Cross-architecture cheat sheet (<code>x86_64</code>, <code>x86</code>, <code>arm</code>, <code>arm64</code>) designed for seccomp debugging " + refs([59]) },
+            { id: "s4-17", title: "GCC Extended Asm Documentation", url: "https://gcc.gnu.org/onlinedocs/gcc/Extended-Asm.html", type: "Official Docs", filterCategory: "Official Spec / Docs", language: "English", descHtml: "Complete compiler manual for embedding assembly directly inside C/C++ " + refs([60]) },
+            { id: "s4-18", title: "GCC Inline Assembly Writeup", url: "https://main.lv/writeup/gcc_inline_assembly.md", type: "Tutorial", filterCategory: "Guide / Reference", language: "English", descHtml: "Practical AMD64 Linux examples calling <code>mmap</code> and <code>RDRAND</code> with syntax switching " + refs([39]) }
+          ]
+        },
+        {
+          id: "section-5",
+          number: 5,
+          title: "Operating Systems Development, Long Mode, and Bare-Metal Execution",
+          shortTitle: "5. OS Dev, Long Mode & Bare-Metal",
+          contextHtml:
+            "<p>Operating system development strips away standard library runtime support (<code>no_std</code> or freestanding C) and confronts hardware initialization directly " + refs([65, 66, 67]) +
+            ". Because x86-64 CPUs do not boot straight into 64-bit mode, escalating from 32-bit protected mode into 64-bit Long Mode requires verifying <code>CPUID</code> support and checking bit 29 of <code>EDX</code> after invoking <code>CPUID</code> function <code>0x80000001</code>, building an identity-mapped 4-level page table (<code>PML4</code>, <code>PDPT</code>/<code>PDP</code>, <code>PDT</code>/<code>PD</code>, <code>PT</code>), loading the <code>PML4</code> physical address into <code>CR3</code>, enabling Physical Address Extension (<code>PAE</code>), setting the Long Mode bit in <code>EFER</code>, activating paging in <code>CR0</code>, loading a 64-bit Global Descriptor Table (<code>GDT</code>), and executing a far jump into 64-bit code " + refs([68, 69, 70]) +
+            ". OSDev documentation and tutorials also detail page-table flags such as bit 63 no-execute (<code>NXE</code> in <code>EFER</code>) and 5-level paging (<code>PML5</code>) " + refs([68, 69]) + ".</p>" +
+            "<p>Two major tutorials illustrate contrasting engineering styles. Carlos Fenollosa's <code>os-tutorial</code> emphasizes code-first assembly and freestanding C from a 16-bit boot sector with minimal theory " + refs([66]) +
+            ". Conversely, Philipp Oppermann's <em>Writing an OS in Rust</em> builds a freestanding 64-bit kernel tested in QEMU, leveraging Rust's borrow checker to isolate unsafe hardware interactions—including VGA text output, CPU exception handlers, double-fault Interrupt Stack Tables, paging translation, and heap allocators—inside safe interfaces " + refs([65, 71]) + ".</p>",
+          resources: [
+            { id: "s5-1", title: "OSDev Wiki: Setting Up Long Mode", url: "https://wiki.osdev.org/Setting_Up_Long_Mode", type: "Documentation", filterCategory: "Official Spec / Docs", language: "English", descHtml: "Canonical bare-metal steps for CPUID detection, 4-level/5-level paging, <code>CR0</code>, and GDT switch " + refs([69]) },
+            { id: "s5-2", title: "OSDev Talk: Entering Long Mode Directly", url: "https://wiki.osdev.org/Talk:Entering_Long_Mode_Directly", type: "Technical Discussion", filterCategory: "Guide / Reference", language: "English", descHtml: "Edge cases around <code>CR4.PAE</code> ordering and fitting transitions in a single boot sector " + refs([72]) },
+            { id: "s5-3", title: "x86-64 Legacy Boot Discussion (HN)", url: "https://news.ycombinator.com/item?id=45420173", type: "Forum Discussion", filterCategory: "Guide / Reference", language: "English", descHtml: "Practitioner discussion on why x86-64 CPUs require stepping through legacy modes before Long Mode " + refs([70]) },
+            { id: "s5-4", title: "Writing an OS in Rust (Philipp Oppermann)", url: "https://os.phil-opp.com/", type: "Tutorial Series", filterCategory: "Course / Video", language: "English", descHtml: "Comprehensive 64-bit Rust kernel series covering exceptions, interrupts, paging, and heap allocation " + refs([65]) },
+            { id: "s5-5", title: "Entering Long Mode (Philipp Oppermann)", url: "https://os.phil-opp.com/entering-longmode/", type: "Tutorial Article", filterCategory: "Guide / Reference", language: "English", descHtml: "Detailed walkthrough of stack setup, Multiboot/CPUID checks, identity paging, and GDT64 " + refs([68]) },
+            { id: "s5-6", title: "OSDev Wiki: Rust Hub", url: "https://wiki.osdev.org/Rust", type: "Directory / Wiki", filterCategory: "Website / Roadmap", language: "English", descHtml: "Index of Rust kernels (Redox, Tock, Theseus, MOROS, Nanvix) and bare-metal crates (<code>x86_64</code>, <code>bootloader</code>, <code>spin</code>, <code>slabmalloc</code>) " + refs([73]) },
+            { id: "s5-7", title: "Why Write an OS in Rust (Wesley Aptekar-Cassels)", url: "https://blog.wesleyac.com/posts/writing-an-os-in-rust", type: "Blog Essay", filterCategory: "Guide / Reference", language: "English", descHtml: "Practical reflection on Rust compile-time safety and fast QEMU boot workflows " + refs([71]) },
+            { id: "s5-8", title: "cfenollosa/os-tutorial", url: "https://github.com/cfenollosa/os-tutorial", type: "GitHub Repo", filterCategory: "Tool / Repo", language: "English", descHtml: "Step-by-step code-first OS tutorial in assembly and C (including <a href=\"https://github.com/cfenollosa/os-tutorial/blob/master/23-fixes/README.md\" target=\"_blank\" rel=\"noopener noreferrer\">Lesson 23 Fixes</a>) " + refs([66, 67]) },
+            { id: "s5-9", title: "awesome-osdev", url: "https://github.com/leap0x7b/awesome-osdev/blob/main/README.md", type: "Curated List", filterCategory: "Guide / Reference", language: "English", descHtml: "Aggregates Higher Half Multiboot Bare Bones, Meaty Skeleton, and Rust OSDev tutorials " + refs([74]) }
+          ]
+        },
+        {
+          id: "section-6",
+          number: 6,
+          title: "Performance Engineering, Microarchitecture, SIMD, and Profiling",
+          shortTitle: "6. Performance, Microarch & SIMD",
+          contextHtml:
+            "<p>Maximizing runtime efficiency demands looking past high-level algorithmic complexity to CPU pipelines, caches, and execution ports " + refs([22, 75, 76]) +
+            ". Because official processor manuals omit substantial microarchitectural timing behavior, practitioners rely heavily on Agner Fog's software optimization and microarchitecture manuals (covering Intel, AMD, and VIA CPUs) " + refs([75, 77, 78]) +
+            " alongside <code>uops.info</code> and its <code>uiCA</code> analyzer, which empirically characterize latency, throughput, port usage, and <code>uops</code> counts across recent Intel and x86 microarchitectures " + refs([76, 79, 80]) + ".</p>" +
+            "<p>For vector parallelization, rather than coding raw assembly vector instructions directly, the Algorithmica HPC guide teaches C/C++ intrinsics mapping to SIMD registers—128-bit <code>xmm0–xmm15</code> (SSE), 256-bit <code>ymm0–ymm15</code> (AVX/AVX2), and 512-bit <code>zmm0–zmm15</code> (AVX-512)—enabled with compiler flags such as <code>-march=native</code> or <code>#pragma GCC target(\"avx2\")</code> " + refs([81, 82]) +
+            ". Keep in mind two compiler caveats: compilers do not always emit the exact instruction named by an intrinsic, and certain composite intrinsics expand into multi-instruction sequences that may perform worse than native instructions " + refs([82, 83]) +
+            ". At the operating system layer, Denis Bakhvalov's <em>Performance Analysis and Tuning on Modern CPUs</em> targets microarchitectural profiling " + refs([79]) +
+            ", while Brendan Gregg's Linux performance slides detail <code>perf_events</code>, <code>ss</code>, <code>slabtop</code>, active benchmarking, and static performance tuning " + refs([84]) +
+            " (with his <code>strace</code> syscall analysis post also cited in performance texts " + refs([85]) + ").</p>",
+          resources: [
+            { id: "s6-1", title: "Agner Fog Software Optimization Resources", url: "https://www.agner.org/optimize/", type: "Reference Hub", filterCategory: "Guide / Reference", language: "English", descHtml: "Authoritative C++, assembly, and calling convention manuals for Intel and AMD x86 CPUs " + refs([54, 75]) },
+            { id: "s6-2", title: "Optimizing Subroutines in Assembly Language (PDF)", url: "https://github.com/tpn/pdfs/blob/master/Agner%20Fog%20-%20Optimizing%20Subroutines%20in%20Assembly%20Language%20-%20An%20optimization%20guide%20to%20x86%20platforms%20(2017-05-01).pdf", type: "Book / Manual PDF", filterCategory: "Book / PDF", language: "English", descHtml: "Agner Fog's 2017 optimization guide for x86 subroutines " + refs([77]) },
+            { id: "s6-3", title: "Microarchitecture of Intel, AMD and VIA CPUs (PDF)", url: "https://github.com/tpn/pdfs/blob/master/Agner%20Fog%20-%20Microarchitecture%20of%20Intel%2C%20AMD%20and%20VIA%20CPUs%20-%20An%20optimization%20guide%20for%20assembly%20programmers%20and%20compiler%20makers%20(2018-04-09).pdf", type: "Book / Manual PDF", filterCategory: "Book / PDF", language: "English", descHtml: "Agner Fog's 2018 pipeline and microarchitecture reference " + refs([78]) },
+            { id: "s6-4", title: "uops.info Instruction Database and uiCA", url: "https://uops.info/", type: "Web Database / Tool", filterCategory: "Tool / Repo", language: "English", descHtml: "Measured latency, throughput, and port usage tables plus XML datasets and <code>uiCA</code> " + refs([76, 79]) },
+            { id: "s6-5", title: "uops.info Academic Publication (ResearchGate)", url: "https://www.researchgate.net/publication/332215129_uopsinfo_Characterizing_Latency_Throughput_and_Port_Usage_of_Instructions_on_Intel_Microarchitectures", type: "Paper Record", filterCategory: "Guide / Reference", language: "English", descHtml: "Academic paper describing automated microarchitectural instruction characterization on Intel CPUs " + refs([80]) },
+            { id: "s6-6", title: "Intel Intrinsics Guide", url: "https://www.intel.com/content/www/us/en/docs/intrinsics-guide/index.html", type: "Official Reference", filterCategory: "Official Spec / Docs", language: "English", descHtml: "Interactive lookup for SSE, AVX, AVX2, AVX-512, and crypto intrinsics (<a href=\"https://www.intel.com/content/www/us/en/content-details/794831/intel-intrinsics-guide-download.html\" target=\"_blank\" rel=\"noopener noreferrer\">Offline Download</a> / <a href=\"https://alouettesu.github.io/Intrinsics/\" target=\"_blank\" rel=\"noopener noreferrer\">Static Mirror</a>) " + refs([81, 83, 86]) },
+            { id: "s6-7", title: "Intel Intrinsics Reference Manual (PDF)", url: "https://www.intel.com/content/dam/develop/external/us/en/documents/18072-347603.pdf", type: "Manual PDF", filterCategory: "Book / PDF", language: "English", descHtml: "Legacy printable Intel C++ Compiler SSE/intrinsics reference " + refs([87]) },
+            { id: "s6-8", title: "How to Read the Intel Intrinsics Guide", url: "https://stackoverflow.com/questions/62349373/how-to-read-the-intel-intrinsics-guide", type: "Q&A Guide", filterCategory: "Guide / Reference", language: "English", descHtml: "Explains bit-slice pseudocode notation such as <code>imm8[7:0]</code> and <code>dst[i+31:i]</code> " + refs([88]) },
+            { id: "s6-9", title: "Algorithmica HPC: SIMD Intrinsics", url: "https://github.com/algorithmica-org/algorithmica/blob/master/content/english/hpc/simd/intrinsics.md", type: "Book Chapter", filterCategory: "Book / PDF", language: "English", descHtml: "Practical C++ SIMD guide covering vector types (<code>__m256i</code>), padding vs. scalar tails, and GCC vector extensions " + refs([82]) },
+            { id: "s6-10", title: "awesome-simd", url: "https://github.com/awesome-simd/awesome-simd", type: "Curated List", filterCategory: "Guide / Reference", language: "English", descHtml: "Aggregates SIMD libraries, LLVM references, and optimization hubs " + refs([46]) },
+            { id: "s6-11", title: "High-Performance Assembly Thread", url: "https://www.reddit.com/r/Assembly_language/comments/1taimob/best_way_to_learn_highperformance_assembly/", type: "Forum Discussion", filterCategory: "Guide / Reference", language: "English", descHtml: "Practitioner discussion pairing <code>uops.info</code>, Agner Fog, and Felix Cloutier " + refs([89]) },
+            { id: "s6-12", title: "Performance Analysis and Tuning on Modern CPUs", url: "https://dokumen.pub/performance-analysis-and-tuning-on-modern-cpus-1nbsped-9798575614234.html", type: "Book", filterCategory: "Book / PDF", language: "English", descHtml: "Modern CPU profiling and microarchitectural optimization guide by Denis Bakhvalov " + refs([79]) },
+            { id: "s6-13", title: "Linux Performance Tools (Brendan Gregg)", url: "https://www.brendangregg.com/Slides/Velocity2015_LinuxPerfTools.pdf", type: "Presentation PDF", filterCategory: "Book / PDF", language: "English", descHtml: "Velocity 2015 deck on <code>perf_events</code>, <code>ss</code>, <code>slabtop</code>, and active benchmarking methodology " + refs([84]) }
+          ]
+        },
+        {
+          id: "section-7",
+          number: 7,
+          title: "Debugging, Reverse Engineering, and Binary Exploitation",
+          shortTitle: "7. Debugging, RE & Binary Exploitation",
+          contextHtml:
+            "<p>Binary analysis and exploitation unite every preceding layer: tracing control flow in stripped executables, mapping registers back to ABI calling conventions, inspecting runtime memory, and chaining flaws past mitigations such as <code>NX</code>, <code>ASLR</code>, <code>PIE</code>, stack canaries, and <code>RELRO</code> " + refs([90, 91, 92, 93]) +
+            ". On Linux ELF binaries, vanilla GDB lacks modern reverse-engineering displays, so practitioners typically load <code>pwndbg</code> (a modular Python framework battle-tested on Python 3.10+ and GDB 12.1+ on Ubuntu 22.04/24.04, with experimental Python 3.12+ / LLDB 19+ support whose <code>2026.10.28</code> release fixed a <code>pwndbg-lldb</code> launcher issue and refined glibc <code>try-free</code> heap checks) or <code>GEF</code> (a single architecture-agnostic GDB script with zero dependencies) " + refs([94, 95, 96]) +
+            ". On macOS and cross-platform LLVM toolchains, <code>LLDB</code> serves as the native debugger " + refs([92, 97]) +
+            ". On Windows, <code>x64dbg</code> provides open-source 32-bit and 64-bit user-mode debugging and Scylla import reconstruction, while practitioner guides describe Microsoft's <code>WinDbg</code> as essential for kernel-mode debugging, crash dumps, and Windows internals " + refs([92, 98, 99, 100]) + ".</p>" +
+            "<p>For static disassembly and automated exploitation, NSA's open-source <code>Ghidra</code> competes with commercial <code>IDA Pro</code> (which offers a limited free tier restricted to non-commercial use) and API-first <code>Binary Ninja</code> (offering a free cloud tier), while <code>radare2</code> (paired with the <code>Cutter</code> GUI or <code>r2ghidra</code> plugin) provides scriptable CLI triage " + refs([92, 100, 101]) +
+            ". Exploit development and CTF workflows center on Python tooling including <code>pwntools</code>, <code>ROPgadget</code>, <code>Ropper</code>, <code>one_gadget</code>, <code>checksec</code>, <code>Frida</code> (dynamic JS hooking), <code>angr</code> (symbolic execution), <code>Qiling</code> (emulation), and <code>z3-solver</code> " + refs([93, 101]) +
+            ". Analysts must also maintain operational security hygiene inside their own toolchains: Calif.io security researchers disclosed RCE vulnerabilities across Ghidra, <code>radare2</code>, <code>IDA Pro</code>, and Binary Ninja Sidekick—demonstrating specifically that Ghidra releases &gt;= 9.1 lacked an <code>ObjectInputFilter</code> on the client when connecting to a malicious Ghidra server " + refs([102]) + ".</p>" +
+            "<p>For structured hands-on progression, security educators recommend starting on Arizona State University's free SSH-based <code>pwn.college</code> dojo—where \"easy\" challenges provide source code and \"hard\" variants force binary reversing—before tackling <code>Nightmare</code>'s 90+ documented CTF writeups, <code>crackmes.one</code> targets, and specialized Windows or kernel exploitation tracks " + refs([90, 103, 104, 105]) + ".</p>",
+          resources: [
+            { id: "s7-1", title: "pwndbg (GitHub)", url: "https://github.com/pwndbg/pwndbg", type: "Tool / Plugin", filterCategory: "Tool / Repo", language: "English", descHtml: "Modular GDB/LLDB exploit-dev plugin (<a href=\"https://github.com/pwndbg/pwndbg/releases\" target=\"_blank\" rel=\"noopener noreferrer\">Releases</a>, <a href=\"https://github.com/sponsors/pwndbg\" target=\"_blank\" rel=\"noopener noreferrer\">Sponsors &amp; Related Tools</a>) " + refs([94, 95, 106]) },
+            { id: "s7-2", title: "GEF - GDB Enhanced Features", url: "https://github.com/hugsy/gef", type: "Tool / Plugin", filterCategory: "Tool / Repo", language: "English", descHtml: "Zero-dependency, architecture-agnostic single-script enhancement for GDB " + refs([96]) },
+            { id: "s7-3", title: "LLVM LLDB Debugger", url: "https://lldb.llvm.org/", type: "Official Docs", filterCategory: "Official Spec / Docs", language: "English", descHtml: "Docs featuring GDB-to-LLDB maps, <a href=\"https://lldb.llvm.org/use/tutorial.html\" target=\"_blank\" rel=\"noopener noreferrer\">LLDB Tutorial</a>, <a href=\"https://github.com/llvm/llvm-project.git\" target=\"_blank\" rel=\"noopener noreferrer\">LLVM Git</a>, and <a href=\"https://llvm.org/devmtg/2016-03/Tutorials/LLDB-tutorial.pdf\" target=\"_blank\" rel=\"noopener noreferrer\">2016 Slides</a> " + refs([97, 107, 108]) },
+            { id: "s7-4", title: "x64dbg Official Site", url: "https://x64dbg.com/", type: "Tool / Website", filterCategory: "Tool / Repo", language: "English", descHtml: "Open-source Windows x32/x64 user-mode debugger (<a href=\"https://github.com/x64dbg/x64dbg\" target=\"_blank\" rel=\"noopener noreferrer\">GitHub Repo</a>) " + refs([98, 99]) },
+            { id: "s7-5", title: "Best Reverse Engineering Tools Overview", url: "https://www.reverseengineering.app/en/blog/best-reverse-engineering-tools", type: "Guide", filterCategory: "Guide / Reference", language: "English", descHtml: "Compares Ghidra, IDA Pro, Binary Ninja, radare2/Cutter, WinDbg, Frida, and CAPE " + refs([92]) },
+            { id: "s7-6", title: "Reverse Engineering Tools Directory", url: "https://medium.com/@derya.cortuk/reverse-engineering-tools-fccc151f0a82", type: "Blog Guide", filterCategory: "Guide / Reference", language: "English", descHtml: "Covers <a href=\"https://www.hex-rays.com/\" target=\"_blank\" rel=\"noopener noreferrer\">Hex-Rays IDA Pro</a>, <a href=\"http://www.hopperapp.com/\" target=\"_blank\" rel=\"noopener noreferrer\">Hopper</a>, <a href=\"http://jd.benow.ca/\" target=\"_blank\" rel=\"noopener noreferrer\">Java Decompiler</a>, and <a href=\"http://ilspy.net/\" target=\"_blank\" rel=\"noopener noreferrer\">ILSpy</a> " + refs([100]) },
+            { id: "s7-7", title: "Essential Free CTF Arsenal (Reflare)", url: "https://reflare.com/research/the-essential-free-tools-every-ctf-competitor-needs-in-their-arsenal", type: "Guide", filterCategory: "Guide / Reference", language: "English", descHtml: "Explains <code>Ghidra</code>, <code>pwntools</code>, <code>ROPgadget</code>, <code>Ropper</code>, <code>one_gadget</code>, and <code>checksec</code> " + refs([93]) },
+            { id: "s7-8", title: "CTF Reverse Engineering Workflow", url: "https://www.getclaudeskills.com/skills/ctf-reverse-engineering-ljagiello", type: "Playbook", filterCategory: "Guide / Reference", language: "English", descHtml: "Practical commands for <code>ltrace</code>/<code>strace</code>, Frida, <code>angr</code>, <code>z3</code>, XOR patterns, and <a href=\"https://github.com/zrax/pycdc\" target=\"_blank\" rel=\"noopener noreferrer\">pycdc</a> " + refs([101]) },
+            { id: "s7-9", title: "Kali Linux RE Guides (GeeksforGeeks / DataFlair)", url: "https://www.geeksforgeeks.org/ethical-hacking/reverse-engineering-in-kali-linux/", type: "Tutorials", filterCategory: "Guide / Reference", language: "English", descHtml: "Intro workflows for Apktool, Frida, Volatility, and radare2 (also <a href=\"https://data-flair.training/blogs/reverse-engineering-tools-in-kali-linux/\" target=\"_blank\" rel=\"noopener noreferrer\">DataFlair overview</a>) " + refs([109, 110]) },
+            { id: "s7-10", title: "Security Vulnerabilities in RE Tools (Calif.io)", url: "https://calif.io/research/security-tools-rce", type: "Security Research", filterCategory: "Guide / Reference", language: "English", descHtml: "Technical writeup on RCE flaws in Ghidra &gt;= 9.1, radare2, IDA Pro, and Binary Ninja Sidekick " + refs([102]) },
+            { id: "s7-11", title: "pwn.college: Intro to RE and Pwn", url: "https://pwn.college/intro-re-pwn~5933fc84/", type: "Interactive Dojo", filterCategory: "Interactive Lab / CTF", language: "English", descHtml: "Free ASU platform covering C warmup, assembly, <a href=\"https://pwn.college/intro-re-pwn~5933fc84/reversing/\" target=\"_blank\" rel=\"noopener noreferrer\">Reversing</a>, shellcode, and format strings " + refs([111, 112]) },
+            { id: "s7-12", title: "pwn.college: Binary Exploitation", url: "https://pwn.college/intro-to-cybersecurity/binary-exploitation/", type: "Interactive Dojo", filterCategory: "Interactive Lab / CTF", language: "English", descHtml: "Hands-on SSH challenges (<code>ssh hacker@dojo.pwn.college</code>) teaching stack overflow precision and endianness " + refs([104]) },
+            { id: "s7-13", title: "Nightmare Course", url: "https://guyinatuxedo.github.io/", type: "Course / Book", filterCategory: "Book / PDF", language: "English", descHtml: "Linear CTF binary exploitation curriculum (90+ challenges, <a href=\"https://github.com/guyinatuxedo/nightmare\" target=\"_blank\" rel=\"noopener noreferrer\">GitHub</a>, <a href=\"https://discord.gg/p5E3VZF\" target=\"_blank\" rel=\"noopener noreferrer\">Discord</a>) " + refs([90]) },
+            { id: "s7-14", title: "Roppers Pwning Roadmap", url: "https://www.hoppersroppers.org/roadmap/training/pwning.html", type: "Curriculum Guide", filterCategory: "Guide / Reference", language: "English", descHtml: "Recommended sequence pairing <code>pwn.college</code> and <code>Nightmare</code> with foundational C and Python " + refs([105]) },
+            { id: "s7-15", title: "crackmes.one", url: "https://crackmes.one/", type: "Practice Platform", filterCategory: "Website / Roadmap", language: "English", descHtml: "Community repository of 4,866 crackmes and 6,878 writeups across 102,712 users (ZIP password: <code>crackmes.one</code>) " + refs([103]) },
+            { id: "s7-16", title: "RE and Binary Exploitation Mastery Roadmap", url: "https://medium.com/@abdelaazizbenafghoul/%EF%B8%8F-roadmap-to-master-reverse-engineering-binary-exploitation-3483a833821b", type: "Blog Roadmap", filterCategory: "Guide / Reference", language: "English", descHtml: "5-stage path recommending <em>The IDA Pro Book</em>, <em>The Rootkit Arsenal</em>, <em>Windows Internals</em>, and OffSec EXP-301/AWE " + refs([91]) },
+            { id: "s7-17", title: "Assembly Puzzle Games Discussion (HN)", url: "https://news.ycombinator.com/item?id=22582269", type: "Forum Thread", filterCategory: "Guide / Reference", language: "English", descHtml: "Hacker News discussion of <em>Nightmare</em> recommending <em>Human Resource Machine</em> and <em>Shenzhen I/O</em> " + refs([113]) },
+            { id: "s7-18", title: "Compiler, Assembler, and RE Video Link", url: "https://www.youtube.com/watch?v=cd2yNNInMS4", type: "Video", filterCategory: "Course / Video", language: "Arabic", descHtml: "Arabic programming video referencing beginner software cracking and reverse engineering with Ghidra " + refs([11]) }
+          ]
+        }
+      ];
+
+      const STORAGE_KEYS = {
+        COMPLETED: "gh_assemblytutorials_completed_v1",
+        THEME: "gh_assemblytutorials_theme_v1"
+      };
+
+      let completedSet = new Set();
+      let collapsedSections = new Set();
+      let filterState = {
+        query: "",
+        language: "ALL",
+        typeCategory: "ALL",
+        status: "ALL"
+      };
+
+      function safeGetStorage(key) {
+        try {
+          return window.localStorage.getItem(key);
+        } catch (e) {
+          return null;
+        }
+      }
+
+      function safeSetStorage(key, val) {
+        try {
+          window.localStorage.setItem(key, val);
+        } catch (e) {
+          /* Ignore storage errors in restricted contexts */
+        }
+      }
+
+      const SUN_SVG = '<svg aria-hidden="true" height="14" viewBox="0 0 16 16" width="14" fill="var(--attention-fg)"><path d="M8 12a4 4 0 1 1 0-8 4 4 0 0 1 0 8Zm0-1.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5Zm5.657-8.157a.75.75 0 0 1 0 1.061l-1.061 1.06a.749.749 0 0 1-1.275-.326.749.749 0 0 1 .215-.734l1.06-1.06a.75.75 0 0 1 1.06 0Zm-9.193 9.193a.75.75 0 0 1 0 1.06l-1.06 1.061a.75.75 0 1 1-1.061-1.06l1.06-1.061a.75.75 0 0 1 1.061 0ZM8 0a.75.75 0 0 1 .75.75v1.5a.75.75 0 0 1-1.5 0V.75A.75.75 0 0 1 8 0ZM3 8a.75.75 0 0 1-.75.75H.75a.75.75 0 0 1 0-1.5h1.5A.75.75 0 0 1 3 8Zm13 0a.75.75 0 0 1-.75.75h-1.5a.75.75 0 0 1 0-1.5h1.5A.75.75 0 0 1 16 8Zm-8 5a.75.75 0 0 1 .75.75v1.5a.75.75 0 0 1-1.5 0v-1.5A.75.75 0 0 1 8 13Zm3.536-1.464a.75.75 0 0 1 1.06 0l1.061 1.06a.75.75 0 0 1-1.06 1.061l-1.061-1.06a.75.75 0 0 1 0-1.061ZM2.343 2.343a.75.75 0 0 1 1.061 0l1.06 1.061a.751.751 0 0 1-.018 1.042.751.751 0 0 1-1.042.018l-1.06-1.06a.75.75 0 0 1 0-1.06Z"></path></svg>';
+      const MOON_SVG = '<svg aria-hidden="true" height="14" viewBox="0 0 16 16" width="14" fill="var(--done-fg)"><path d="M9.598 1.591a.749.749 0 0 1 .785-.175 7.001 7.001 0 1 1-8.967 8.967.75.75 0 0 1 .961-.96 5.5 5.5 0 0 0 7.046-7.046.75.75 0 0 1 .175-.786Zm1.616 1.945a7 7 0 0 1-7.678 7.678 5.499 5.499 0 1 0 7.678-7.678Z"></path></svg>';
+
+      function applyTheme(mode, persist) {
+        document.documentElement.setAttribute("data-color-mode", mode);
+        var iconWrap = document.getElementById("theme-icon-wrap");
+        var label = document.getElementById("theme-label");
+        if (iconWrap && label) {
+          if (mode === "light") {
+            iconWrap.innerHTML = SUN_SVG;
+            label.textContent = "Light Default";
+          } else {
+            iconWrap.innerHTML = MOON_SVG;
+            label.textContent = "Dark Default";
+          }
+        }
+        if (persist) {
+          safeSetStorage(STORAGE_KEYS.THEME, mode);
+        }
+      }
+
+      function loadState() {
+        var rawCompleted = safeGetStorage(STORAGE_KEYS.COMPLETED);
+        if (rawCompleted) {
+          try {
+            var arr = JSON.parse(rawCompleted);
+            if (Array.isArray(arr)) {
+              completedSet = new Set(arr);
+            }
+          } catch (e) {
+            completedSet = new Set();
+          }
+        }
+        var savedTheme = safeGetStorage(STORAGE_KEYS.THEME);
+        applyTheme(savedTheme === "light" ? "light" : "dark", false);
+      }
+
+      function saveCompletedState() {
+        safeSetStorage(STORAGE_KEYS.COMPLETED, JSON.stringify(Array.from(completedSet)));
+      }
+
+      function getTypeBadgeClass(filterCategory) {
+        switch (filterCategory) {
+          case "Official Spec / Docs":
+            return "badge-accent";
+          case "Book / PDF":
+            return "badge-done";
+          case "Interactive Lab / CTF":
+            return "badge-danger";
+          case "Tool / Repo":
+            return "badge-success";
+          case "Course / Video":
+            return "badge-attention";
+          default:
+            return "badge-neutral";
+        }
+      }
+
+      function stripHtml(htmlStr) {
+        var tmp = document.createElement("div");
+        tmp.innerHTML = htmlStr;
+        return tmp.textContent || tmp.innerText || "";
+      }
+
+      function matchesFilters(item) {
+        if (filterState.language !== "ALL" && item.language !== filterState.language) {
+          return false;
+        }
+        if (filterState.typeCategory !== "ALL" && item.filterCategory !== filterState.typeCategory) {
+          return false;
+        }
+        var isDone = completedSet.has(item.id);
+        if (filterState.status === "COMPLETED" && !isDone) {
+          return false;
+        }
+        if (filterState.status === "UNCHECKED" && isDone) {
+          return false;
+        }
+        if (filterState.query.trim() !== "") {
+          var q = filterState.query.trim().toLowerCase();
+          var haystack = (
+            item.title + " " +
+            stripHtml(item.descHtml) + " " +
+            item.type + " " +
+            item.filterCategory + " " +
+            item.language
+          ).toLowerCase();
+          if (haystack.indexOf(q) === -1) {
+            return false;
+          }
+        }
+        return true;
+      }
+
+      function renderSources() {
+        var list = document.getElementById("sources-list");
+        if (!list) return;
+        var html = "";
+        for (var i = 0; i < SOURCES.length; i++) {
+          var num = i + 1;
+          var url = SOURCES[i];
+          html += '<li id="src-' + num + '" style="margin-bottom: 4px;">' +
+            '<a href="' + url + '" target="_blank" rel="noopener noreferrer">' + url + '</a>' +
+            '</li>';
+        }
+        list.innerHTML = html;
+      }
+
+      function renderSidebarTOC() {
+        var tocNav = document.getElementById("sidebar-toc-nav");
+        if (!tocNav) return;
+
+        var html = '<a href="#overview" class="gh-toc-link active" data-toc-target="overview">' +
+          '<span>Overview &amp; Caveats</span>' +
+          '<span class="gh-badge badge-neutral font-mono" style="font-size: 10.5px;">2 notes</span>' +
+          '</a>';
+
+        ROADMAP_SECTIONS.forEach(function (sec) {
+          var totalInSec = sec.resources.length;
+          var doneInSec = sec.resources.filter(function (r) { return completedSet.has(r.id); }).length;
+          var matchingInSec = sec.resources.filter(matchesFilters).length;
+          var badgeClass = (doneInSec === totalInSec && totalInSec > 0) ? "badge-success" : "badge-neutral";
+
+          html += '<a href="#' + sec.id + '" class="gh-toc-link" style="' + (matchingInSec === 0 ? "opacity:0.5;" : "") + '" data-toc-target="' + sec.id + '">' +
+            '<span>' + sec.shortTitle + '</span>' +
+            '<span class="gh-badge ' + badgeClass + ' font-mono" style="font-size: 10.5px;">' + doneInSec + '/' + matchingInSec + '</span>' +
+            '</a>';
+        });
+
+        html += '<a href="#sources-appendix" class="gh-toc-link" data-toc-target="sources-appendix">' +
+          '<span>Primary Sources Index</span>' +
+          '<span class="gh-badge badge-neutral font-mono" style="font-size: 10.5px;">113</span>' +
+          '</a>';
+
+        tocNav.innerHTML = html;
+      }
+
+      function renderSections() {
+        var container = document.getElementById("roadmap-sections-container");
+        if (!container) return;
+
+        var totalResources = 0;
+        var totalVisible = 0;
+        var totalCompleted = completedSet.size;
+        var englishCount = 0;
+        var arabicCount = 0;
+
+        ROADMAP_SECTIONS.forEach(function (sec) {
+          sec.resources.forEach(function (r) {
+            totalResources++;
+            if (r.language === "English") englishCount++;
+            if (r.language === "Arabic") arabicCount++;
+          });
+        });
+
+        document.getElementById("lang-btn-all").textContent = "All (" + totalResources + ")";
+        document.getElementById("lang-btn-en").textContent = "English (" + englishCount + ")";
+        document.getElementById("lang-btn-ar").textContent = "Arabic (" + arabicCount + ")";
+        document.getElementById("tab-total-badge").textContent = String(totalResources);
+
+        var isAnyFilterActive =
+          filterState.query.trim() !== "" ||
+          filterState.language !== "ALL" ||
+          filterState.typeCategory !== "ALL" ||
+          filterState.status !== "ALL";
+
+        var sectionsHtml = "";
+
+        ROADMAP_SECTIONS.forEach(function (sec) {
+          var filteredItems = sec.resources.filter(matchesFilters);
+          totalVisible += filteredItems.length;
+
+          if (isAnyFilterActive && filteredItems.length === 0) {
+            return;
+          }
+
+          var secTotal = sec.resources.length;
+          var secDone = sec.resources.filter(function (r) { return completedSet.has(r.id); }).length;
+          var secPct = secTotal > 0 ? Math.round((secDone / secTotal) * 100) : 0;
+          var isCollapsed = collapsedSections.has(sec.id);
+
+          var rowsHtml = "";
+          filteredItems.forEach(function (item, idx) {
+            var isChecked = completedSet.has(item.id);
+            var typeBadgeClass = getTypeBadgeClass(item.filterCategory);
+            var langBadgeClass = item.language === "Arabic" ? "badge-done" : "badge-neutral";
+
+            rowsHtml += '<tr class="' + (isChecked ? "row-completed" : "") + '">' +
+              '<td style="width: 38px; text-align: center;">' +
+              '<input type="checkbox" class="gh-checkbox" data-resource-id="' + item.id + '" aria-label="Mark ' + item.title + ' as completed"' + (isChecked ? " checked" : "") + ' />' +
+              '</td>' +
+              '<td class="font-mono" style="width: 42px; font-size: 12px; color: var(--fg-subtle); user-select: none;">' + (idx + 1) + '</td>' +
+              '<td>' +
+              '<div style="font-weight: 600; font-size: 14px; margin-bottom: 4px;">' +
+              '<a href="' + item.url + '" target="_blank" rel="noopener noreferrer" class="res-title-link" style="display: inline-flex; align-items: center; gap: 5px;">' +
+              '<span>' + item.title + '</span>' +
+              '<svg aria-hidden="true" height="12" viewBox="0 0 16 16" width="12" fill="currentColor" style="opacity: 0.8; flex-shrink: 0;">' +
+              '<path d="M3.75 2h3.5a.75.75 0 0 1 0 1.5h-3.5a.25.25 0 0 0-.25.25v8.5c0 .138.112.25.25.25h8.5a.25.25 0 0 0 .25-.25v-3.5a.75.75 0 0 1 1.5 0v3.5A1.75 1.75 0 0 1 12.25 14h-8.5A1.75 1.75 0 0 1 2 12.25v-8.5C2 2.784 2.784 2 3.75 2Zm6.854-1h4.146a.25.25 0 0 1 .25.25v4.146a.25.25 0 0 1-.427.177L13.03 4.03 9.28 7.78a.751.751 0 0 1-1.042-.018.751.751 0 0 1-.018-1.042l3.75-3.75-1.543-1.543A.25.25 0 0 1 10.604 1Z"></path>' +
+              '</svg>' +
+              '</a>' +
+              '</div>' +
+              '<div style="font-size: 13px; color: var(--fg-muted); line-height: 1.55;">' + item.descHtml + '</div>' +
+              '</td>' +
+              '<td style="width: 155px;"><span class="gh-badge ' + typeBadgeClass + '">' + item.type + '</span></td>' +
+              '<td style="width: 95px;"><span class="gh-badge ' + langBadgeClass + '">' + item.language + '</span></td>' +
+              '</tr>';
+          });
+
+          sectionsHtml += '<section id="' + sec.id + '" class="toc-section">' +
+            '<div class="gh-section-header">' +
+            '<div class="gh-section-title-wrap">' +
+            '<a href="#' + sec.id + '" class="gh-anchor font-mono" aria-label="Anchor link to Section ' + sec.number + '">#</a>' +
+            '<h2>Section ' + sec.number + ': ' + sec.title + '</h2>' +
+            '</div>' +
+            '<div style="display: flex; align-items: center; gap: 10px;">' +
+            '<span class="font-mono" style="font-size: 12px; color: var(--fg-muted);">' + secDone + '/' + secTotal + ' (' + secPct + '%)</span>' +
+            '<button type="button" class="gh-btn btn-toggle-section" style="padding: 2px 8px; font-size: 11px;" data-section-id="' + sec.id + '" aria-expanded="' + (!isCollapsed) + '">' +
+            (isCollapsed ? "Expand" : "Collapse") +
+            '</button>' +
+            '</div>' +
+            '</div>' +
+            '<div class="' + (isCollapsed ? "hidden" : "") + '" id="body-' + sec.id + '">' +
+            '<div style="margin-bottom: 18px;">' +
+            '<h3 style="margin-top: 0; font-size: 12.5px; text-transform: uppercase; letter-spacing: 0.04em; color: var(--fg-muted);">Analytical Context</h3>' +
+            sec.contextHtml +
+            '</div>' +
+            '<div style="margin-bottom: 10px;">' +
+            '<h3 style="margin: 0; font-size: 12.5px; text-transform: uppercase; letter-spacing: 0.04em; color: var(--fg-muted);">' +
+            'Resources (' + (filteredItems.length === secTotal ? secTotal + ' items' : 'showing ' + filteredItems.length + ' of ' + secTotal + ' items') + ')' +
+            '</h3>' +
+            '</div>' +
+            '<div class="gh-table-wrap">' +
+            '<table class="gh-table">' +
+            '<thead><tr>' +
+            '<th style="width: 38px; text-align: center;" title="Completion status">Done</th>' +
+            '<th style="width: 42px;">#</th>' +
+            '<th>Resource &amp; Description</th>' +
+            '<th style="width: 155px;">Type</th>' +
+            '<th style="width: 95px;">Language</th>' +
+            '</tr></thead>' +
+            '<tbody>' + rowsHtml + '</tbody>' +
+            '</table>' +
+            '</div>' +
+            '</div>' +
+            '</section>';
+        });
+
+        container.innerHTML = sectionsHtml;
+
+        var emptyState = document.getElementById("empty-filter-state");
+        if (totalVisible === 0) {
+          emptyState.classList.remove("hidden");
+        } else {
+          emptyState.classList.add("hidden");
+        }
+
+        document.getElementById("visible-count-label").textContent = String(totalVisible);
+        var resetFiltersBtn = document.getElementById("btn-reset-filters");
+        if (isAnyFilterActive) {
+          resetFiltersBtn.classList.remove("hidden");
+        } else {
+          resetFiltersBtn.classList.add("hidden");
+        }
+
+        var pct = totalResources > 0 ? Math.round((totalCompleted / totalResources) * 100) : 0;
+        document.getElementById("global-progress-text").textContent = totalCompleted + " / " + totalResources + " (" + pct + "%)";
+        document.getElementById("global-progress-fill").style.width = pct + "%";
+        document.getElementById("global-progress-bar-wrap").setAttribute("aria-valuenow", String(totalCompleted));
+
+        renderSidebarTOC();
+        setupScrollSpy();
+      }
+
+      var scrollObserver = null;
+
+      function setupScrollSpy() {
+        if (scrollObserver) {
+          scrollObserver.disconnect();
+        }
+        if (typeof IntersectionObserver === "undefined") return;
+        var sections = document.querySelectorAll(".toc-section");
+        if (!sections.length) return;
+
+        scrollObserver = new IntersectionObserver(function (entries) {
+          entries.forEach(function (entry) {
+            if (entry.isIntersecting) {
+              var id = entry.target.getAttribute("id");
+              document.querySelectorAll(".gh-toc-link").forEach(function (link) {
+                if (link.getAttribute("data-toc-target") === id) {
+                  link.classList.add("active");
+                } else {
+                  link.classList.remove("active");
+                }
+              });
+            }
+          });
+        }, {
+          rootMargin: "-15% 0px -70% 0px",
+          threshold: 0
+        });
+
+        sections.forEach(function (sec) {
+          scrollObserver.observe(sec);
+        });
+      }
+
+      var toastTimer = null;
+
+      function showToast(message) {
+        var toast = document.getElementById("gh-toast");
+        var toastMsg = document.getElementById("gh-toast-msg");
+        toastMsg.textContent = message;
+        toast.classList.add("visible");
+        if (toastTimer) clearTimeout(toastTimer);
+        toastTimer = setTimeout(function () {
+          toast.classList.remove("visible");
+        }, 2800);
+      }
+
+      function copyProgressMarkdown() {
+        var total = 0;
+        ROADMAP_SECTIONS.forEach(function (s) { total += s.resources.length; });
+        var done = completedSet.size;
+        var pct = total > 0 ? Math.round((done / total) * 100) : 0;
+
+        var lines = [
+          "# Low-Level CS, Systems Programming & Security Roadmap Progress",
+          "- Overall Completion: **" + done + " / " + total + " (" + pct + "%)**",
+          ""
+        ];
+
+        ROADMAP_SECTIONS.forEach(function (sec) {
+          var sDone = sec.resources.filter(function (r) { return completedSet.has(r.id); }).length;
+          lines.push("## Section " + sec.number + ": " + sec.title + " (" + sDone + "/" + sec.resources.length + ")");
+          sec.resources.forEach(function (r) {
+            var mark = completedSet.has(r.id) ? "x" : " ";
+            lines.push("- [" + mark + "] [" + r.title + "](" + r.url + ") — *" + r.type + "* (" + r.language + ")");
+          });
+          lines.push("");
+        });
+
+        var textToCopy = lines.join("\n");
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(textToCopy).then(function () {
+            showToast("Copied Markdown checklist (" + done + "/" + total + " completed) to clipboard");
+          }).catch(function () {
+            fallbackCopy(textToCopy, done, total);
+          });
+        } else {
+          fallbackCopy(textToCopy, done, total);
+        }
+      }
+
+      function fallbackCopy(text, done, total) {
+        var ta = document.createElement("textarea");
+        ta.value = text;
+        ta.style.position = "fixed";
+        ta.style.left = "-9999px";
+        document.body.appendChild(ta);
+        ta.select();
+        try {
+          document.execCommand("copy");
+          showToast("Copied Markdown checklist (" + done + "/" + total + " completed) to clipboard");
+        } catch (e) {
+          showToast("Unable to copy to clipboard in this browser context");
+        }
+        document.body.removeChild(ta);
+      }
+
+      function resetAllFilters() {
+        filterState = {
+          query: "",
+          language: "ALL",
+          typeCategory: "ALL",
+          status: "ALL"
+        };
+        document.getElementById("search-input").value = "";
+        document.getElementById("btn-clear-search").classList.add("hidden");
+        document.getElementById("type-filter-select").value = "ALL";
+
+        document.querySelectorAll("[data-lang-filter]").forEach(function (btn) {
+          btn.classList.toggle("selected", btn.getAttribute("data-lang-filter") === "ALL");
+        });
+        document.querySelectorAll("[data-status-filter]").forEach(function (btn) {
+          btn.classList.toggle("selected", btn.getAttribute("data-status-filter") === "ALL");
+        });
+
+        renderSections();
+      }
+
+      function bindEvents() {
+        document.getElementById("btn-theme-toggle").addEventListener("click", function () {
+          var current = document.documentElement.getAttribute("data-color-mode");
+          applyTheme(current === "dark" ? "light" : "dark", true);
+        });
+
+        document.getElementById("btn-copy-summary").addEventListener("click", copyProgressMarkdown);
+
+        var confirmBox = document.getElementById("reset-confirm-box");
+        document.getElementById("btn-reset-prompt").addEventListener("click", function () {
+          confirmBox.classList.toggle("hidden");
+        });
+        document.getElementById("btn-cancel-reset").addEventListener("click", function () {
+          confirmBox.classList.add("hidden");
+        });
+        document.getElementById("btn-confirm-reset").addEventListener("click", function () {
+          completedSet.clear();
+          saveCompletedState();
+          confirmBox.classList.add("hidden");
+          renderSections();
+          showToast("Roadmap progress cleared");
+        });
+
+        document.querySelectorAll(".gh-tab").forEach(function (tab) {
+          tab.addEventListener("click", function () {
+            document.querySelectorAll(".gh-tab").forEach(function (t) { t.classList.remove("active"); });
+            tab.classList.add("active");
+            var targetId = tab.getAttribute("data-nav-target");
+            if (targetId === "sources-appendix") {
+              var srcList = document.getElementById("sources-list");
+              var srcBtn = document.getElementById("btn-toggle-sources");
+              if (srcList && srcList.classList.contains("hidden")) {
+                srcList.classList.remove("hidden");
+                if (srcBtn) srcBtn.textContent = "Collapse Sources";
+              }
+            }
+            var el = document.getElementById(targetId);
+            if (el) {
+              var parentSection = el.closest(".toc-section");
+              if (parentSection && collapsedSections.has(parentSection.id)) {
+                collapsedSections.delete(parentSection.id);
+                renderSections();
+              }
+              var freshEl = document.getElementById(targetId);
+              if (freshEl) freshEl.scrollIntoView({ behavior: "smooth" });
+            }
+          });
+        });
+
+        var searchInput = document.getElementById("search-input");
+        var clearSearchBtn = document.getElementById("btn-clear-search");
+
+        searchInput.addEventListener("input", function (e) {
+          filterState.query = e.target.value;
+          if (filterState.query.length > 0) {
+            clearSearchBtn.classList.remove("hidden");
+          } else {
+            clearSearchBtn.classList.add("hidden");
+          }
+          renderSections();
+        });
+
+        clearSearchBtn.addEventListener("click", function () {
+          searchInput.value = "";
+          filterState.query = "";
+          clearSearchBtn.classList.add("hidden");
+          searchInput.focus();
+          renderSections();
+        });
+
+        document.addEventListener("keydown", function (e) {
+          if (
+            e.key === "/" &&
+            document.activeElement !== searchInput &&
+            ["INPUT", "TEXTAREA", "SELECT"].indexOf(document.activeElement.tagName) === -1
+          ) {
+            e.preventDefault();
+            searchInput.focus();
+          }
+        });
+
+        document.querySelectorAll("[data-lang-filter]").forEach(function (btn) {
+          btn.addEventListener("click", function () {
+            document.querySelectorAll("[data-lang-filter]").forEach(function (b) { b.classList.remove("selected"); });
+            btn.classList.add("selected");
+            filterState.language = btn.getAttribute("data-lang-filter");
+            renderSections();
+          });
+        });
+
+        document.getElementById("type-filter-select").addEventListener("change", function (e) {
+          filterState.typeCategory = e.target.value;
+          renderSections();
+        });
+
+        document.querySelectorAll("[data-status-filter]").forEach(function (btn) {
+          btn.addEventListener("click", function () {
+            document.querySelectorAll("[data-status-filter]").forEach(function (b) { b.classList.remove("selected"); });
+            btn.classList.add("selected");
+            filterState.status = btn.getAttribute("data-status-filter");
+            renderSections();
+          });
+        });
+
+        document.getElementById("btn-reset-filters").addEventListener("click", resetAllFilters);
+        document.getElementById("btn-empty-reset").addEventListener("click", resetAllFilters);
+
+        document.getElementById("btn-expand-all").addEventListener("click", function () {
+          collapsedSections.clear();
+          renderSections();
+        });
+
+        document.getElementById("btn-collapse-all").addEventListener("click", function () {
+          ROADMAP_SECTIONS.forEach(function (sec) { collapsedSections.add(sec.id); });
+          renderSections();
+        });
+
+        document.getElementById("btn-toggle-mobile-toc").addEventListener("click", function () {
+          var tocNav = document.getElementById("sidebar-toc-nav");
+          tocNav.classList.toggle("hidden");
+        });
+
+        document.getElementById("btn-toggle-sources").addEventListener("click", function () {
+          var srcList = document.getElementById("sources-list");
+          var srcBtn = document.getElementById("btn-toggle-sources");
+          var isNowHidden = srcList.classList.toggle("hidden");
+          srcBtn.textContent = isNowHidden ? "Expand Sources" : "Collapse Sources";
+        });
+
+        document.getElementById("roadmap-sections-container").addEventListener("change", function (e) {
+          if (e.target && e.target.classList.contains("gh-checkbox")) {
+            var resId = e.target.getAttribute("data-resource-id");
+            if (e.target.checked) {
+              completedSet.add(resId);
+            } else {
+              completedSet.delete(resId);
+            }
+            saveCompletedState();
+            renderSections();
+          }
+        });
+
+        document.getElementById("roadmap-sections-container").addEventListener("click", function (e) {
+          var toggleBtn = e.target.closest(".btn-toggle-section");
+          if (toggleBtn) {
+            var secId = toggleBtn.getAttribute("data-section-id");
+            if (collapsedSections.has(secId)) {
+              collapsedSections.delete(secId);
+            } else {
+              collapsedSections.add(secId);
+            }
+            renderSections();
+          }
+        });
+      }
+
+      loadState();
+      renderSources();
+      bindEvents();
+      renderSections();
+    })();
+  </script>
+</body>
+</html>
